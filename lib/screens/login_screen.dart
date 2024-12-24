@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 print("카카오 로그인");
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.yellow,
+                backgroundColor: Color.fromRGBO(250, 230, 77, 1),
                 minimumSize: Size.fromHeight(80),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 print("네이버 로그인");
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: Color.fromRGBO(90, 196, 103, 1),
                 minimumSize: Size.fromHeight(80),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
