@@ -1,0 +1,180 @@
+import 'package:flutter/material.dart';
+
+class PostUserInfo extends StatefulWidget {
+  const PostUserInfo({super.key});
+
+  @override
+  State<PostUserInfo> createState() => _PostUserInfoState();
+}
+
+class _PostUserInfoState extends State<PostUserInfo> {
+  final int _maxLength = 12;
+  String _currentLength = "0";
+
+  final TextEditingController _nickNameController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+
+  // 회원가입인지 내정보 수정인지에 따라 상태 관리 해야됨
+
+  @override
+  void initState() {
+    super.initState();
+    _nickNameController.addListener(() {
+      setState(() {
+        // 현재 입력된 텍스트 길이 업데이트
+        _currentLength = _nickNameController.text.length.toString();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _nickNameController.dispose();
+    _phoneNumberController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "닉네임",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              Text(
+                '$_currentLength / $_maxLength',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.grey,
+                ),
+              )
+            ],
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          TextField(
+            controller: _nickNameController,
+            decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 1.0,
+                ),
+              ),
+              labelText: '닉네임',
+              labelStyle: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "전화번호",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          TextField(
+            controller: _phoneNumberController,
+            decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 1.0,
+                ),
+              ),
+              labelText: '전화번호',
+              labelStyle: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "주소",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          TextField(
+            controller: _addressController,
+            decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 1.0,
+                ),
+              ),
+              labelText: '주소',
+              labelStyle: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 50,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              print(
+                  '닉네임 : ${_nickNameController.text} 전화번호 : ${_phoneNumberController.text} 주소 : ${_addressController.text}');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xff748d6f),
+              elevation: 0,
+              minimumSize: Size.fromHeight(70),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            child: Text(
+              '회원가입',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
