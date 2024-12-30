@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shotandshoot/screens/Signin_login_screen.dart';
+import 'package:shotandshoot/screens/signin_success_screen.dart';
 
 class PostUserInfo extends StatefulWidget {
   const PostUserInfo({super.key});
