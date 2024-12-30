@@ -1,7 +1,7 @@
 class Company {
   final String companyName;
   final String address;
-  final String phoneNumber;
+  String? phoneNumber;
   final String lat;
   final String lot;
   double? distance;
@@ -9,7 +9,7 @@ class Company {
   Company(
       {required this.companyName,
       required this.address,
-      required this.phoneNumber,
+      this.phoneNumber,
       required this.lat,
       required this.lot,
       this.distance});

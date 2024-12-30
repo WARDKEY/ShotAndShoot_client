@@ -15,7 +15,7 @@ class MypageScreen extends StatefulWidget {
 class _MypageScreenState extends State<MypageScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool isLoggedIn = true;
+  bool isLoggedIn = false;
 
   List<Map<String, dynamic>> posts = [
     {

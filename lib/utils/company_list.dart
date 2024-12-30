@@ -42,10 +42,12 @@ class CompanyList extends StatelessWidget {
         ],
       ),
       trailing: IconButton(
-        icon: Icon(Icons.phone, color: Color(0xffac2323)),
+        icon: Icon(Icons.phone,
+            color: company.phoneNumber != "" ? Color(0xffac2323) : Colors.grey),
         onPressed: () {
-          print("전화시도");
-          _launchPhone;
+          if (company.phoneNumber != "") {
+            _launchPhone();
+          }
         },
       ),
       onTap: () => print("Place 1 tapped"),
