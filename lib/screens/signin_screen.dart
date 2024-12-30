@@ -5,6 +5,7 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 import 'package:shotandshoot/screens/login_screen.dart';
 import 'package:shotandshoot/screens/signin_info_screen.dart';
+import 'package:shotandshoot/service/api_service.dart';
 
 import '../main.dart';
 import '../provider/app_state_provider.dart';
@@ -18,6 +19,7 @@ class SigninScreen extends StatefulWidget {
 
 class _SigninScreenState extends State<SigninScreen> {
   int textAccount = 0;
+  ApiService apiService = ApiService();
 
   void textCount() {}
 
@@ -84,11 +86,15 @@ class _SigninScreenState extends State<SigninScreen> {
   }
 
   Future<void> loadUser() async {
+
     try {
       User user = await UserApi.instance.me();
       print('사용자 정보 요청 성공'
           '\n회원번호: ${user.id}'
           '\n닉네임: ${user.kakaoAccount?.profile?.nickname}');
+
+      apiService.postKakaoInfo(user.id, user.kakaoAccount?.profile!.nickname);
+
     } catch (error) {
       print('사용자 정보 요청 실패 $error');
     }
@@ -138,6 +144,7 @@ class _SigninScreenState extends State<SigninScreen> {
               onPressed: () {
                 signInWithKakao();
                 print("카카오 로그인");
+                loadUser();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color.fromRGBO(250, 230, 77, 1),
