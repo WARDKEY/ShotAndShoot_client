@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shotandshoot/screens/Signin_login_screen.dart';
 
 class PostUserInfo extends StatefulWidget {
   const PostUserInfo({super.key});
@@ -34,6 +35,15 @@ class _PostUserInfoState extends State<PostUserInfo> {
     _phoneNumberController.dispose();
     _addressController.dispose();
     super.dispose();
+  }
+
+  // 회원가입 완료 페이지로 이동
+  void navigateToSignInLoginPage() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const SigninLoginScreen(),
+      ),
+    );
   }
 
   @override
@@ -153,6 +163,8 @@ class _PostUserInfoState extends State<PostUserInfo> {
           ),
           ElevatedButton(
             onPressed: () {
+              // 닉네임, 전화번호, 주소 들어가기전 클릭 비활성화
+              navigateToSignInLoginPage();
               print(
                   '닉네임 : ${_nickNameController.text} 전화번호 : ${_phoneNumberController.text} 주소 : ${_addressController.text}');
             },
