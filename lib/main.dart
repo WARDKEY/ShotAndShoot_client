@@ -2,19 +2,32 @@ import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 import 'package:shotandshoot/screens/board_screen.dart';
 import 'package:shotandshoot/screens/company_screen.dart';
 import 'package:shotandshoot/screens/login_screen.dart';
 import 'package:shotandshoot/screens/main_screen.dart';
 import 'package:shotandshoot/screens/mypage_screen.dart';
+import 'package:shotandshoot/screens/post_write.dart';
 import 'package:shotandshoot/screens/scan_screen.dart';
 import 'package:shotandshoot/provider/app_state_provider.dart';
 import 'package:shotandshoot/screens/signin_screen.dart';
 
 void main() async {
+  // 웹 환경에서 카카오 로그인을 정상적으로 완료하려면 runApp() 호출 전 아래 메서드 호출 필요
   WidgetsFlutterBinding.ensureInitialized();
+
+  // kakao login
+
+  // runApp() 호출 전 Flutter SDK 초기화
   await dotenv.load();
+  KakaoSdk.init(
+    // 키 설정 (공유x)
+    nativeAppKey: dotenv.get('NATIVE_APP_KEY'),
+    javaScriptAppKey: dotenv.get('JAVASCRIPT_APP_KEY'),
+  );
+
   await NaverMapSdk.instance.initialize(clientId: dotenv.get('CLIENT_KEY'));
   runApp(const MyApp());
 }
@@ -43,7 +56,6 @@ class AppPage extends StatefulWidget {
 }
 
 class _AppPageState extends State<AppPage> {
-
   final List _widgetOptions = [
     MainScreen(),
     BoardScreen(),
@@ -69,7 +81,8 @@ class _AppPageState extends State<AppPage> {
               TabItem(icon: Icons.person, title: '마이'),
             ],
             onTap: appState.onItemTapped,
-            initialActiveIndex: appState.selectedIndex < 5 ? appState.selectedIndex : 0,
+            initialActiveIndex:
+                appState.selectedIndex < 5 ? appState.selectedIndex : 0,
             style: TabStyle.fixedCircle,
             curveSize: 95,
             top: -40,
