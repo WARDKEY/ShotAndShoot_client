@@ -49,6 +49,7 @@ class _SigninScreenState extends State<SigninScreen> {
       try {
         await UserApi.instance.loginWithKakaoTalk().then((value) {
           print('value from kakao $value');
+          loadUser();
           navigateToSignInfoPage();
         });
 
@@ -65,6 +66,7 @@ class _SigninScreenState extends State<SigninScreen> {
         try {
           await UserApi.instance.loginWithKakaoAccount().then((value) {
             print('value from kakao $value');
+            loadUser();
             navigateToSignInfoPage();
           });
           print('카카오계정으로 로그인 성공');
@@ -76,6 +78,7 @@ class _SigninScreenState extends State<SigninScreen> {
       try {
         await UserApi.instance.loginWithKakaoAccount().then((value) {
           print('value from kakao $value');
+          loadUser();
           navigateToSignInfoPage();
         });
         print('카카오계정으로 로그인 성공');
@@ -94,7 +97,6 @@ class _SigninScreenState extends State<SigninScreen> {
           '\n닉네임: ${user.kakaoAccount?.profile?.nickname}');
 
       apiService.postKakaoInfo(user.id, user.kakaoAccount?.profile!.nickname);
-
     } catch (error) {
       print('사용자 정보 요청 실패 $error');
     }
@@ -144,7 +146,6 @@ class _SigninScreenState extends State<SigninScreen> {
               onPressed: () {
                 signInWithKakao();
                 print("카카오 로그인");
-                loadUser();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color.fromRGBO(250, 230, 77, 1),
@@ -181,7 +182,6 @@ class _SigninScreenState extends State<SigninScreen> {
             ElevatedButton(
               onPressed: () {
                 print("네이버 로그인");
-                loadUser();
                 kakaoLogout();
               },
               style: ElevatedButton.styleFrom(
