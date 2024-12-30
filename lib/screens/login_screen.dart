@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 import 'package:shotandshoot/main.dart';
+import 'package:shotandshoot/screens/signin_screen.dart';
 
 import '../provider/app_state_provider.dart';
 
@@ -22,6 +23,15 @@ class _LoginScreenState extends State<LoginScreen> {
         builder: (context) => MyApp(),
       ),
     );
+  }
+
+  void navigateToSignInPage(){
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const SigninScreen(),
+      ),
+    );
+
   }
 
   // 카카오 로그인
@@ -67,6 +77,17 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (error) {
         print('카카오계정으로 로그인 실패 $error');
       }
+    }
+  }
+
+  Future<void> loadUser() async {
+    try {
+      User user = await UserApi.instance.me();
+      print('사용자 정보 요청 성공'
+          '\n회원번호: ${user.id}'
+          '\n닉네임: ${user.kakaoAccount?.profile?.nickname}');
+    } catch (error) {
+      print('사용자 정보 요청 실패 $error');
     }
   }
 
@@ -144,6 +165,8 @@ class _LoginScreenState extends State<LoginScreen> {
             ElevatedButton(
               onPressed: () {
                 print("네이버 로그인");
+                loadUser();
+                kakaoLogout();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color.fromRGBO(90, 196, 103, 1),
@@ -211,6 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
                                     // 눌렀을 때 갈 곳 설정 = 회원가입 페이지
+                                    navigateToSignInPage();
                                     print("회원가입");
                                   },
                               ),
