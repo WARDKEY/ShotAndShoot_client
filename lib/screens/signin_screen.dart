@@ -38,7 +38,11 @@ class _SigninScreenState extends State<SigninScreen> {
               icon: Icon(Icons.home)),
         ],
       ),
-      body: PostUserInfo(),
+      body: Column(
+        children: [
+          PostUserInfo(),
+        ],
+      ),
     );
   }
 }
