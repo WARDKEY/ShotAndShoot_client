@@ -98,7 +98,8 @@ class _MypageScreenState extends State<MypageScreen>
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => LoginScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -121,7 +122,8 @@ class _MypageScreenState extends State<MypageScreen>
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => SigninScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => SigninScreen()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -160,31 +162,29 @@ class _MypageScreenState extends State<MypageScreen>
           ),
           // 탭별 콘텐츠
           Expanded(
-            child: Container(
-              padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  Column(
-                    children: [
-                      PostList(
-                        posts: posts,
-                      ),
-                    ],
-                  ),
-
-                  ListView.builder(
-                    itemCount: 30,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text("댓글 #$index"),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            )
-          ),
+              child: Container(
+            padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                Column(
+                  children: [
+                    PostList(
+                      posts: posts,
+                    ),
+                  ],
+                ),
+                ListView.builder(
+                  itemCount: 30,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text("댓글 #$index"),
+                    );
+                  },
+                ),
+              ],
+            ),
+          )),
         ],
       ),
     );

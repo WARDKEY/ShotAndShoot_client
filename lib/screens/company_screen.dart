@@ -4,6 +4,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shotandshoot/utils/company_list.dart';
 
+import '../models/company.dart';
+import '../service/api_service.dart';
+
 class CompanyScreen extends StatefulWidget {
   const CompanyScreen({super.key});
 
@@ -12,29 +15,39 @@ class CompanyScreen extends StatefulWidget {
 }
 
 class _CompanyScreenState extends State<CompanyScreen> {
-  late Map<String, double> _currentLocation = {};
+  final ApiService _apiService = ApiService();
+  late Map<String, double> _currentLocation = {}; // 현재 위치
+  late Future<List<Company>> _companies;
 
-  List<Map<String, dynamic>> companies = [
-    {
-      "id": 1,
-      "name": "폐기물업체1",
-      "address": "경기도 양주시 백석읍dddddddddddddddddddddddddddddddddddddddddd",
-      "latitude": "37.506932467450326",
-      "longitude": "127.05578661133796",
-    },
-    {
-      "id": 2,
-      "name": "폐기물업체2",
-      "address": "경기도 의정부시 가능동",
-      "latitude": "37.606932467450399",
-      "longitude": "127.05578661133711",
+  Future<List<Company>> fetchCompany() async {
+    try {
+      final companyData = await _apiService.fetchCompanies();
+
+      const latLng = NLatLng(35.17407924, 126.8265393); //현재위치
+
+      List<Company> companies = companyData.map((company) {
+        double companyLat = double.parse(company.lat);
+        double companyLot = double.parse(company.lot);
+
+        var distance = latLng.distanceTo(NLatLng(companyLat, companyLot));
+        company.distance = distance; // 계산된 거리 할당
+
+        return company;
+      }).toList();
+
+      companies.sort((a, b) => a.distance!.compareTo(b.distance!));
+      return companies;
+    } catch (e) {
+      print("에러 $e");
+      return [];
     }
-  ];
+  }
 
   @override
   void initState() {
     super.initState();
     _permission();
+    _companies = fetchCompany();
   }
 
   Future<void> _permission() async {
@@ -67,16 +80,39 @@ class _CompanyScreenState extends State<CompanyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<List<Company>>(
+      future: _companies,
+      builder: (context, snapshot) {
+        // 로딩 중
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        // 에러처리
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        // 데이터가 없는 경우 처리
+        if (snapshot.data == null || snapshot.data!.isEmpty) {
+          return Center(child: Text('No data available'));
+        }
+
+        List<Company> companies = snapshot.data!;
+
+        return buildNaverMap(companies);
+      },
+    );
+  }
+
+  Widget buildNaverMap(List<Company> companies) {
     return Stack(
       children: [
-        // 네이버 지도
+        //--------------------네이버맵-----------------
         NaverMap(
           options: NaverMapViewOptions(
             initialCameraPosition: NCameraPosition(
-              target: NLatLng(
-                37.5666,
-                126.979,
-              ),
+              target: NLatLng(35.17407924, 126.8265393),
               zoom: 13,
             ),
             locationButtonEnable: true,
@@ -85,7 +121,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
           onMapReady: (controller) {
             var marker = NMarker(
               id: "현재 위치",
-              position: NLatLng(37.5666, 126.979),
+              position: NLatLng(35.17407924, 126.8265393),
             );
             controller.addOverlay(marker);
             marker.setSize(Size(40, 40));
@@ -93,18 +129,19 @@ class _CompanyScreenState extends State<CompanyScreen> {
                 NOverlayImage.fromAssetImage("images/current_location.png"));
 
             for (int i = 0; i < companies.length; i++) {
+              var company = companies[i];
               var marker = NMarker(
-                id: companies[i]['id'].toString(),
+                id: company.companyName,
                 position: NLatLng(
-                  double.parse(companies[i]['latitude']),
-                  double.parse(companies[i]['longitude']),
+                  double.parse(company.lat),
+                  double.parse(company.lot),
                 ),
               );
               controller.addOverlay(marker);
 
               var onMarkerInfoWindow = NInfoWindow.onMarker(
                 id: marker.info.id,
-                text: companies[i]['name'].toString(),
+                text: company.companyName,
               );
               marker.openInfoWindow(onMarkerInfoWindow);
               marker.setOnTapListener((NMarker marker) {
@@ -118,6 +155,8 @@ class _CompanyScreenState extends State<CompanyScreen> {
           onCameraIdle: () {},
           onSelectedIndoorChanged: (indoor) {},
         ),
+
+        //----------------하단 바텀시트---------------
         Positioned.fill(
           child: DraggableScrollableSheet(
             initialChildSize: 0.4, // 초기 높이 (40%)
@@ -152,7 +191,9 @@ class _CompanyScreenState extends State<CompanyScreen> {
                     ),
                     Divider(),
                     ...companies.map((company) {
-                      return CompanyList(company: company,);
+                      return CompanyList(
+                        company: company,
+                      );
                     }),
                   ],
                 ),
@@ -160,7 +201,8 @@ class _CompanyScreenState extends State<CompanyScreen> {
             },
           ),
         ),
-        // 상단 검색창
+
+        //----------------상단 검색창---------------
         Positioned(
           top: 30.0,
           left: 16.0,
