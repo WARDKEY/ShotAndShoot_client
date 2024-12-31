@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shotandshoot/screens/signin_success_screen.dart';
+import 'package:shotandshoot/service/api_service.dart';
 
 class PostUserInfo extends StatefulWidget {
   const PostUserInfo({super.key});
@@ -164,6 +165,8 @@ class _PostUserInfoState extends State<PostUserInfo> {
           ElevatedButton(
             onPressed: () {
               // 닉네임, 전화번호, 주소 들어가기전 클릭 비활성화
+              ApiService.postUserInfo(_nickNameController.text,
+                  _phoneNumberController.text, _addressController.text);
               navigateToSignInLoginPage();
               print(
                   '닉네임 : ${_nickNameController.text} 전화번호 : ${_phoneNumberController.text} 주소 : ${_addressController.text}');

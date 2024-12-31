@@ -7,7 +7,6 @@ import 'package:shotandshoot/screens/login_screen.dart';
 import 'package:shotandshoot/screens/signin_info_screen.dart';
 import 'package:shotandshoot/service/api_service.dart';
 
-import '../main.dart';
 import '../provider/app_state_provider.dart';
 
 class SigninScreen extends StatefulWidget {
@@ -19,7 +18,6 @@ class SigninScreen extends StatefulWidget {
 
 class _SigninScreenState extends State<SigninScreen> {
   int textAccount = 0;
-  ApiService apiService = ApiService();
 
   void textCount() {}
 
@@ -96,7 +94,7 @@ class _SigninScreenState extends State<SigninScreen> {
           '\n회원번호: ${user.id}'
           '\n닉네임: ${user.kakaoAccount?.profile?.nickname}');
 
-      apiService.postKakaoInfo(user.id, user.kakaoAccount?.profile!.nickname);
+      ApiService.postKakaoInfo(user.id, user.kakaoAccount?.profile!.nickname);
     } catch (error) {
       print('사용자 정보 요청 실패 $error');
     }
