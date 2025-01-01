@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 import 'package:shotandshoot/main.dart';
@@ -101,11 +102,34 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // 구글 로그인
+  Future<void> signInWithGoogle()  async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    if (googleUser != null) {
+      print('name = ${googleUser.displayName}');
+      print('email = ${googleUser.email}');
+      print('id = ${googleUser.id}');
+    }
+    navigateToSignInPage();
+  }
+
+  // 구글 로그아웃
+  Future<void> googleLogout()  async {
+    await GoogleSignIn().signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: Text("로그인"),
         centerTitle: true,
         actions: [
@@ -164,12 +188,11 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                print("네이버 로그인");
-                loadUser();
-                kakaoLogout();
+                signInWithGoogle();
+                print("구글 로그인");
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(90, 196, 103, 1),
+                backgroundColor: Color.fromRGBO(242, 242, 242, 1),
                 minimumSize: Size.fromHeight(80),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
@@ -179,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Image.asset(
-                    "images/naver.png",
+                    "images/google_logo.png",
                     width: 40,
                     height: 40,
                   ),
@@ -187,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 55,
                   ),
                   Text(
-                    "네이버 로그인",
+                    "구글 로그인",
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 25,
@@ -205,9 +228,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: BoxDecoration(
                     border: Border(
                         top: BorderSide(
-                  color: Colors.grey,
-                  width: 1.0,
-                ))),
+                          color: Colors.grey,
+                          width: 1.0,
+                        ))),
                 child: Column(
                   children: [
                     SizedBox(
@@ -253,3 +276,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
