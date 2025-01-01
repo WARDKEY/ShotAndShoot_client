@@ -1,11 +1,18 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart';
+import 'package:flutter_naver_login/interface/types/naver_login_result.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 import 'package:shotandshoot/screens/login_screen.dart';
 import 'package:shotandshoot/screens/signin_info_screen.dart';
 import 'package:shotandshoot/service/api_service.dart';
+import 'package:http/http.dart' as http;
 
 import '../provider/app_state_provider.dart';
 
@@ -47,7 +54,7 @@ class _SigninScreenState extends State<SigninScreen> {
       try {
         await UserApi.instance.loginWithKakaoTalk().then((value) {
           print('value from kakao $value');
-          loadUser();
+          kakaoLoadUser();
           navigateToSignInfoPage();
         });
 
@@ -64,7 +71,7 @@ class _SigninScreenState extends State<SigninScreen> {
         try {
           await UserApi.instance.loginWithKakaoAccount().then((value) {
             print('value from kakao $value');
-            loadUser();
+            kakaoLoadUser();
             navigateToSignInfoPage();
           });
           print('카카오계정으로 로그인 성공');
@@ -76,7 +83,7 @@ class _SigninScreenState extends State<SigninScreen> {
       try {
         await UserApi.instance.loginWithKakaoAccount().then((value) {
           print('value from kakao $value');
-          loadUser();
+          kakaoLoadUser();
           navigateToSignInfoPage();
         });
         print('카카오계정으로 로그인 성공');
@@ -86,15 +93,14 @@ class _SigninScreenState extends State<SigninScreen> {
     }
   }
 
-  Future<void> loadUser() async {
-
+  Future<void> kakaoLoadUser() async {
     try {
       User user = await UserApi.instance.me();
       print('사용자 정보 요청 성공'
           '\n회원번호: ${user.id}'
           '\n닉네임: ${user.kakaoAccount?.profile?.nickname}');
 
-      ApiService.postKakaoInfo(user.id, user.kakaoAccount?.profile!.nickname);
+      ApiService.postKakaoInfo(user.id as String, user.kakaoAccount?.profile!.nickname);
     } catch (error) {
       print('사용자 정보 요청 실패 $error');
     }
@@ -107,6 +113,67 @@ class _SigninScreenState extends State<SigninScreen> {
       print('로그아웃 성공, SDK에서 토큰 삭제');
     } catch (error) {
       print('로그아웃 실패, SDK에서 토큰 삭제 $error');
+    }
+  }
+
+  // 구글 로그인
+  Future<void> signInWithGoogle()  async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    if (googleUser != null) {
+      print('name = ${googleUser.displayName}');
+      print('email = ${googleUser.email}');
+      print('id = ${googleUser.id}');
+    }
+    ApiService.postGoogleInfo(googleUser!.id, googleUser?.displayName);
+    navigateToSignInfoPage();
+  }
+
+  // 구글 로그아웃
+  Future<void> googleLogout()  async {
+    await GoogleSignIn().signOut();
+  }
+
+  // 네이버 로그인
+  Future<void> signInWithNaver() async {
+    NaverLoginResult res = await FlutterNaverLogin.logIn();
+    print('accessToken = ${res.accessToken}');
+    print('id = ${res.account.id}');
+    print('email = ${res.account.email}');
+    print('name = ${res.account.name}');
+    await FlutterNaverLogin.logIn().then((value) => navigateToSignInfoPage());
+    NaverAccessToken naverAccessToken =
+        await FlutterNaverLogin.currentAccessToken;
+
+    // setState(() {
+    // var accessToken = naverAccessToken.accessToken;
+    // var tokenType = naverAccessToken.tokenType;
+    // fetchNaverUserDetail(accessToken);
+    // });
+
+    // print("accessToekn $accessToken");
+    // print("tokenType $tokenType");
+    // print('result $result');
+  }
+
+  // 네이버 사용자 정보 불러오기 get 요청
+  Future<void> fetchNaverUserDetail(String accessToken) async {
+    final response = await http
+        .get(Uri.parse('https://openapi.naver.com/v1/nid/me'), headers: {
+      HttpHeaders.authorizationHeader: 'Bearer $accessToken',
+    });
+    final responseJson = jsonDecode(response.body) as Map<String, dynamic>;
+
+    print('value from naver $responseJson');
+  }
+
+  // 네이버 로그아웃
+  Future<void> naverLogout() async {
+    // FlutterNaverLogin.logOut().then((value) => {print("네이버 로그아웃 완료")});
+    try {
+      await FlutterNaverLogin.logOutAndDeleteToken();
+    } catch (error) {
+      print(error);
     }
   }
 
@@ -179,11 +246,11 @@ class _SigninScreenState extends State<SigninScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                print("네이버 로그인");
-                kakaoLogout();
+                signInWithGoogle();
+                print("구글 로그인");
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(90, 196, 103, 1),
+                backgroundColor: Color.fromRGBO(242, 242, 242, 1),
                 minimumSize: Size.fromHeight(80),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
@@ -193,7 +260,7 @@ class _SigninScreenState extends State<SigninScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Image.asset(
-                    "images/naver.png",
+                    "images/google_logo.png",
                     width: 40,
                     height: 40,
                   ),
@@ -201,7 +268,7 @@ class _SigninScreenState extends State<SigninScreen> {
                     width: 55,
                   ),
                   Text(
-                    "네이버 로그인",
+                    "구글 로그인",
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 25,

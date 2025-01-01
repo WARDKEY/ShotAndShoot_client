@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:shotandshoot/models/kakaoInfo.dart';
+import 'package:shotandshoot/models/loginInfo.dart';
 import '../models/company.dart';
 import '../models/memberInfo.dart';
 
@@ -31,8 +31,8 @@ class ApiService {
     }
   }
 
-  // 카카오 정보 서버로 보내는 용도
-  static Future<KakaoInfo> postKakaoInfo(int kakaoId, dynamic nickName) async {
+  // 카카오 로그인 정보 서버로 보내는 용도
+  static Future<LoginInfo> postKakaoInfo(String loginId, dynamic nickName) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/member/kakaoLogin');
 
@@ -43,7 +43,7 @@ class ApiService {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'kakaoId': kakaoId,
+          'loginId': loginId,
           'nickName': nickName,
         }),
       );
@@ -52,10 +52,42 @@ class ApiService {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        return KakaoInfo.fromJson(jsonDecode(response.body));
+        return LoginInfo.fromJson(jsonDecode(response.body));
       } else {
         print('Error: ${response.statusCode} - ${response.body}');
         throw Exception('Failed to post KakaoInfo');
+      }
+    } catch (e) {
+      print('HTTP POST 에러: $e');
+      throw Exception('Error: $e');
+    }
+  }
+
+//   구글 로그인 정보 서버로 보내는 용도
+  static Future<LoginInfo> postGoogleInfo(String loginId, dynamic nickName) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/member/googleLogin');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'loginId': loginId,
+          'nickName': nickName,
+        }),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return LoginInfo.fromJson(jsonDecode(response.body));
+      } else {
+        print('Error: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to post GoogleInfo');
       }
     } catch (e) {
       print('HTTP POST 에러: $e');
