@@ -3,7 +3,8 @@ import 'package:shotandshoot/screens/signin_success_screen.dart';
 import 'package:shotandshoot/service/api_service.dart';
 
 class PostUserInfo extends StatefulWidget {
-  const PostUserInfo({super.key});
+  final String id;
+  const PostUserInfo({super.key, required this.id});
 
   @override
   State<PostUserInfo> createState() => _PostUserInfoState();
@@ -165,7 +166,7 @@ class _PostUserInfoState extends State<PostUserInfo> {
           ElevatedButton(
             onPressed: () {
               // 닉네임, 전화번호, 주소 들어가기전 클릭 비활성화
-              ApiService.postUserInfo(_nickNameController.text,
+              ApiService.postUserInfo(widget.id, _nickNameController.text,
                   _phoneNumberController.text, _addressController.text);
               navigateToSignInLoginPage();
               print(

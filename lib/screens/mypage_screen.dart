@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shotandshoot/models/memberInfo.dart';
 import 'package:shotandshoot/screens/login_screen.dart';
 import 'package:shotandshoot/screens/signin_screen.dart';
 import 'package:shotandshoot/screens/user_edit.dart';
 
+import '../service/api_service.dart';
 import '../utils/post_list.dart';
 
 class MypageScreen extends StatefulWidget {
@@ -14,8 +19,50 @@ class MypageScreen extends StatefulWidget {
 
 class _MypageScreenState extends State<MypageScreen>
     with SingleTickerProviderStateMixin {
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  final ApiService _apiService = ApiService();
+
   late TabController _tabController;
+  late MemberInfo? _member;
   bool isLoggedIn = false;
+
+  Future<void> fetchMypageData({int retryCount = 0}) async {
+    try {
+      final response = await _apiService.fetchMypageData();
+
+      if (response.statusCode == 200) {
+        print('Response body: ${response.body}');
+
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final data = jsonDecode(decodedBody);
+
+        setState(() {
+          _member = MemberInfo.fromJson(data);
+          isLoggedIn = true; // 로그인 상태로 설정
+        });
+      } else if (response.statusCode == 401) {
+        String? accessToken = response.headers['authorization'];
+
+        if (accessToken != null && accessToken.startsWith('Bearer ')) {
+          accessToken = accessToken.substring(7);
+
+          await _secureStorage.write(key: 'accessToken', value: accessToken);
+          await fetchMypageData(retryCount: retryCount + 1);
+        } else {
+          await _secureStorage.delete(key: 'accessToken');
+          setState(() {
+            _member = null;
+            isLoggedIn = false;
+          });
+          print('Unauthorized');
+        }
+      } else {
+        print('Failed to fetch member data');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
   List<Map<String, dynamic>> posts = [
     {
@@ -45,6 +92,7 @@ class _MypageScreenState extends State<MypageScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this); // 두 개의 탭
+    fetchMypageData();
   }
 
   @override
@@ -60,10 +108,9 @@ class _MypageScreenState extends State<MypageScreen>
           isLoggedIn
               ? GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => UserEdit()),
-                    );
+                    Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => UserEdit()))
+                        .then((value) => fetchMypageData());
                   },
                   child: Container(
                     width: double.infinity, // 화면을 꽉 채우도록 설정
@@ -72,7 +119,7 @@ class _MypageScreenState extends State<MypageScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "홍길동 님",
+                          "${_member?.name} 님",
                           style: TextStyle(
                               fontSize: 25,
                               color: Colors.black,

@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:shotandshoot/models/loginInfo.dart';
+import 'package:shotandshoot/service/token_service.dart';
 import '../models/company.dart';
 import '../models/memberInfo.dart';
 
 class ApiService {
+  final TokenService tokenService = TokenService();
+  static final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+
   Future<List<Company>> fetchCompanies() async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/wasteCompany/');
@@ -13,7 +17,6 @@ class ApiService {
     try {
       final response = await http.get(url);
 
-      // 요청 성공 시
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
 
@@ -31,8 +34,22 @@ class ApiService {
     }
   }
 
+  Future<http.Response> fetchMypageData() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/member/');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    return http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+  }
+
   // 카카오 로그인 정보 서버로 보내는 용도
-  static Future<LoginInfo> postKakaoInfo(String loginId, dynamic nickName) async {
+  static Future<bool> postKakaoInfo(String loginId, dynamic nickName) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/member/kakaoLogin');
 
@@ -52,7 +69,17 @@ class ApiService {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        return LoginInfo.fromJson(jsonDecode(response.body));
+        String? accessToken = response.headers['authorization'];
+
+        if (accessToken != null && accessToken.startsWith('Bearer ')) {
+          accessToken = accessToken.substring(7); // "Bearer " 제거
+
+          await _secureStorage.write(key: 'accessToken', value: accessToken);
+          return true; //로그인 성공
+        }
+        return false; //로그인 실패, 토큰발급 필요
+      } else if (response.statusCode == 201) {
+        return false; //로그인 실패, 회원가입 필요
       } else {
         print('Error: ${response.statusCode} - ${response.body}');
         throw Exception('Failed to post KakaoInfo');
@@ -64,7 +91,7 @@ class ApiService {
   }
 
 //   구글 로그인 정보 서버로 보내는 용도
-  static Future<LoginInfo> postGoogleInfo(String loginId, dynamic nickName) async {
+  static Future<bool> postGoogleInfo(String loginId, dynamic nickName) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/member/googleLogin');
 
@@ -84,10 +111,20 @@ class ApiService {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        return LoginInfo.fromJson(jsonDecode(response.body));
+        String? accessToken = response.headers['authorization'];
+
+        if (accessToken != null && accessToken.startsWith('Bearer ')) {
+          accessToken = accessToken.substring(7); // "Bearer " 제거
+
+          await _secureStorage.write(key: 'accessToken', value: accessToken);
+          return true; //로그인 성공
+        }
+        return false; //로그인 실패, 토큰발급 필요
+      } else if (response.statusCode == 201) {
+        return false; //로그인 실패, 회원가입 필요
       } else {
         print('Error: ${response.statusCode} - ${response.body}');
-        throw Exception('Failed to post GoogleInfo');
+        throw Exception('Failed to post KakaoInfo');
       }
     } catch (e) {
       print('HTTP POST 에러: $e');
@@ -97,7 +134,7 @@ class ApiService {
 
 //  회원가입 정보 전달
   static Future<MemberInfo> postUserInfo(
-      String name, String phoneNumber, String address) async {
+      String id, String name, String phoneNumber, String address) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/member/register');
 
@@ -108,6 +145,7 @@ class ApiService {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
+          'id': id,
           'name': name,
           'phoneNumber': phoneNumber,
           'address': address,
@@ -127,5 +165,29 @@ class ApiService {
       print('HTTP POST 에러: $e');
       throw Exception('Error: $e');
     }
+  }
+
+  Future<http.Response> logout() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/member/logout');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+    return http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+  }
+
+  Future<http.Response> deleteAccount() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/member/unregister');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+    return http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
   }
 }

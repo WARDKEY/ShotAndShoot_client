@@ -8,6 +8,7 @@ import 'package:shotandshoot/main.dart';
 import 'package:shotandshoot/screens/signin_screen.dart';
 
 import '../provider/app_state_provider.dart';
+import '../service/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,110 +18,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // 로그인 시 메인 페이지로 이동
-  void navigateToMainPage() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => MyApp(),
-      ),
-    );
-  }
-
-  void navigateToSignInPage(){
+  void navigateToSignInPage() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const SigninScreen(),
       ),
     );
-
-  }
-
-  // 카카오 로그인
-  Future<void> signInWithKakao() async {
-    // 카카오 로그인 구현 예제
-
-// 카카오톡 실행 가능 여부 확인
-// 카카오톡 실행이 가능하면 카카오톡으로 로그인, 아니면 카카오계정으로 로그인
-    if (await isKakaoTalkInstalled()) {
-      try {
-        await UserApi.instance.loginWithKakaoTalk().then((value) {
-          print('value from kakao $value');
-          navigateToMainPage();
-        });
-
-        print('카카오톡으로 로그인 성공');
-      } catch (error) {
-        print('카카오톡으로 로그인 실패 $error');
-
-        // 사용자가 카카오톡 설치 후 디바이스 권한 요청 화면에서 로그인을 취소한 경우,
-        // 의도적인 로그인 취소로 보고 카카오계정으로 로그인 시도 없이 로그인 취소로 처리 (예: 뒤로 가기)
-        if (error is PlatformException && error.code == 'CANCELED') {
-          return;
-        }
-        // 카카오톡에 연결된 카카오계정이 없는 경우, 카카오계정으로 로그인
-        try {
-          await UserApi.instance.loginWithKakaoAccount().then((value) {
-            print('value from kakao $value');
-            navigateToMainPage();
-          });
-          print('카카오계정으로 로그인 성공');
-        } catch (error) {
-          print('카카오계정으로 로그인 실패 $error');
-        }
-      }
-    } else {
-      try {
-        await UserApi.instance.loginWithKakaoAccount().then((value) {
-          print('value from kakao $value');
-          navigateToMainPage();
-        });
-        print('카카오계정으로 로그인 성공');
-      } catch (error) {
-        print('카카오계정으로 로그인 실패 $error');
-      }
-    }
-  }
-
-  Future<void> loadUser() async {
-    try {
-      User user = await UserApi.instance.me();
-      print('사용자 정보 요청 성공'
-          '\n회원번호: ${user.id}'
-          '\n닉네임: ${user.kakaoAccount?.profile?.nickname}');
-    } catch (error) {
-      print('사용자 정보 요청 실패 $error');
-    }
-  }
-
-  // 카카오 로그아웃 (버튼 따로 없어서 만들어야 됨)
-  Future<void> kakaoLogout() async {
-    try {
-      await UserApi.instance.logout();
-      print('로그아웃 성공, SDK에서 토큰 삭제');
-    } catch (error) {
-      print('로그아웃 실패, SDK에서 토큰 삭제 $error');
-    }
-  }
-
-  // 구글 로그인
-  Future<void> signInWithGoogle()  async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-    if (googleUser != null) {
-      print('name = ${googleUser.displayName}');
-      print('email = ${googleUser.email}');
-      print('id = ${googleUser.id}');
-    }
-    navigateToSignInPage();
-  }
-
-  // 구글 로그아웃
-  Future<void> googleLogout()  async {
-    await GoogleSignIn().signOut();
   }
 
   @override
   Widget build(BuildContext context) {
+    AuthService authService = AuthService(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -151,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                signInWithKakao();
+                authService.signInWithKakao();
                 print("카카오 로그인");
               },
               style: ElevatedButton.styleFrom(
@@ -188,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                signInWithGoogle();
+                authService.signInWithGoogle();
                 print("구글 로그인");
               },
               style: ElevatedButton.styleFrom(
@@ -228,9 +137,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: BoxDecoration(
                     border: Border(
                         top: BorderSide(
-                          color: Colors.grey,
-                          width: 1.0,
-                        ))),
+                  color: Colors.grey,
+                  width: 1.0,
+                ))),
                 child: Column(
                   children: [
                     SizedBox(
@@ -276,4 +185,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

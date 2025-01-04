@@ -5,7 +5,8 @@ import 'package:shotandshoot/utils/post_user_info.dart';
 import '../provider/app_state_provider.dart';
 
 class SigninInfoScreen extends StatefulWidget {
-  const SigninInfoScreen({super.key});
+  final String id;
+  const SigninInfoScreen({super.key, required this.id});
 
   @override
   State<SigninInfoScreen> createState() => _SigninInfoScreenState();
@@ -34,7 +35,7 @@ class _SigninInfoScreenState extends State<SigninInfoScreen> {
               icon: Icon(Icons.home)),
         ],
       ),
-      body: PostUserInfo(),
+      body: PostUserInfo(id: widget.id),
     );
   }
 }
