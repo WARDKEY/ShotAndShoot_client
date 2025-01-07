@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shotandshoot/screens/scan_detail.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -261,23 +262,38 @@ class DisplayPictureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: Colors.white,//색변경
+        appBar: AppBar(
+          iconTheme: IconThemeData(
+            color: Colors.white, //색변경
+          ),
+          backgroundColor: Colors.black87,
+          title: const Text(
+            '사진 보기',
+            style: TextStyle(color: Colors.white),
+          ),
+          centerTitle: true,
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ScanDetail(file: File(imagePath))),
+                );
+              },
+              child: Text(
+                "분석",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ],
         ),
-        backgroundColor: Colors.black87,
-        title: const Text('사진 보기', style: TextStyle(color: Colors.white),),
-        centerTitle: true,
-        actions: [
-          TextButton(onPressed: () {}, child: Text("분석", style: TextStyle(color: Colors.white, fontSize: 16),),),
-        ],
-    ),
-      body: Container(
-        color: Colors.black87,
-        child: Center(
-          child: Image.file(File(imagePath)),
-        ),
-      )
-    );
+        body: Container(
+          color: Colors.black87,
+          child: Center(
+            child: Image.file(File(imagePath)),
+          ),
+        ));
   }
 }
