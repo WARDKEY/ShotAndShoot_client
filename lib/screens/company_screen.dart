@@ -16,65 +16,84 @@ class CompanyScreen extends StatefulWidget {
 
 class _CompanyScreenState extends State<CompanyScreen> {
   final ApiService _apiService = ApiService();
-  late Map<String, double> _currentLocation = {}; // 현재 위치
-  late Future<List<Company>> _companies;
-
-  Future<List<Company>> fetchCompany() async {
-    try {
-      final companyData = await _apiService.fetchCompanies();
-
-      const latLng = NLatLng(35.17407924, 126.8265393); //현재위치
-
-      List<Company> companies = companyData.map((company) {
-        double companyLat = double.parse(company.lat);
-        double companyLot = double.parse(company.lot);
-
-        var distance = latLng.distanceTo(NLatLng(companyLat, companyLot));
-        company.distance = distance; // 계산된 거리 할당
-
-        return company;
-      }).toList();
-
-      companies.sort((a, b) => a.distance!.compareTo(b.distance!));
-      return companies;
-    } catch (e) {
-      print("에러 $e");
-      return [];
-    }
-  }
+  late Map<String, double> _currentPosition = {}; // 현재 위치
+  late Future<List<Company>> _companies = Future.value([]); // 초기화
 
   @override
   void initState() {
     super.initState();
     _permission();
-    _companies = fetchCompany();
   }
 
   Future<void> _permission() async {
     var requestStatus = await Permission.location.request();
     var status = await Permission.location.status;
     if (requestStatus.isGranted) {
-      //await _getCurrentLocation();
+      await _getCurrentPosition();
     } else if (requestStatus.isPermanentlyDenied ||
         status.isPermanentlyDenied) {
       openAppSettings();
     }
   }
 
-  Future<void> _getCurrentLocation() async {
+  Future<void> _getCurrentPosition() async {
     try {
-      Position position = await Geolocator.getCurrentPosition()
-          .timeout(const Duration(seconds: 5));
+      Position position = await Geolocator.getCurrentPosition();
 
       setState(() {
-        _currentLocation = {
+        _currentPosition = {
           "latitude": position.latitude,
           "longitude": position.longitude,
         };
       });
-      print(_currentLocation);
+
+      print("현재 위치: $_currentPosition");
+      await _getCurrentLocation(
+          _currentPosition["latitude"]!, _currentPosition["longitude"]!);
     } catch (e) {
-      print(e);
+      print("위치 가져오기 오류: $e");
+      await _getCurrentLocation(37.56100278, 126.9996417); // 기본 위치
+    }
+  }
+
+  Future<void> _getCurrentLocation(double lat, double lot) async {
+    try {
+      String location =
+          await _apiService.getLocation(lat.toString(), lot.toString());
+      setState(() {
+        _companies = fetchCompany(location, lat, lot);
+      });
+    } catch (e) {
+      print("위치를 찾을 수 없습니다: $e");
+    }
+  }
+
+  Future<List<Company>> fetchCompany(
+      String location, double lat, double lot) async {
+    try {
+      final companyData = await _apiService.fetchCompanies(location);
+
+      var latLng = NLatLng(lat, lot); // 현재 위치
+
+      List<Company> companies = companyData.map((company) {
+        try {
+          double companyLat = double.parse(company.lat);
+          double companyLot = double.parse(company.lot);
+
+          var distance = latLng.distanceTo(NLatLng(companyLat, companyLot));
+          company.distance = distance; // 계산된 거리 할당
+        } catch (e) {
+          print("거리 계산 오류: $e");
+          company.distance = double.infinity;
+        }
+        return company;
+      }).toList();
+
+      companies.sort((a, b) => a.distance!.compareTo(b.distance!));
+      return companies;
+    } catch (e) {
+      print("회사 데이터 가져오기 오류: $e");
+      return [];
     }
   }
 
@@ -95,7 +114,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
 
         // 데이터가 없는 경우 처리
         if (snapshot.data == null || snapshot.data!.isEmpty) {
-          return Center(child: Text('No data available'));
+          return Center(child: CircularProgressIndicator()); // 사용자 경험 개선
         }
 
         List<Company> companies = snapshot.data!;
@@ -112,7 +131,8 @@ class _CompanyScreenState extends State<CompanyScreen> {
         NaverMap(
           options: NaverMapViewOptions(
             initialCameraPosition: NCameraPosition(
-              target: NLatLng(35.17407924, 126.8265393),
+              target: NLatLng(_currentPosition["latitude"] ?? 126.9996417,
+                  _currentPosition["longitude"] ?? 37.56100278),
               zoom: 13,
             ),
             locationButtonEnable: true,
@@ -121,7 +141,8 @@ class _CompanyScreenState extends State<CompanyScreen> {
           onMapReady: (controller) {
             var marker = NMarker(
               id: "현재 위치",
-              position: NLatLng(35.17407924, 126.8265393),
+              position: NLatLng(_currentPosition["latitude"] ?? 126.9996417,
+                  _currentPosition["longitude"] ?? 37.56100278),
             );
             controller.addOverlay(marker);
             marker.setSize(Size(40, 40));

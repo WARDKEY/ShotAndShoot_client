@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -10,12 +11,58 @@ class ApiService {
   final TokenService tokenService = TokenService();
   static final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
-  Future<List<Company>> fetchCompanies() async {
-    String ip = dotenv.get('IP');
-    final url = Uri.parse('http://$ip/api/v1/wasteCompany/');
+  Future<String> getLocation(String lat, String lot) async {
+    final url = Uri.parse(
+        "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?request=coordsToaddr&coords=${lot},${lat}&sourcecrs=epsg:4326&output=json");
+    Map<String, String> headers = {
+      "X-NCP-APIGW-API-KEY-ID": dotenv.get('CLIENT_KEY'),
+      "X-NCP-APIGW-API-KEY": dotenv.get('CLIENT_SECRET'),
+    };
 
     try {
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        String jsonData = response.body;
+
+        var mydo =
+            jsonDecode(jsonData)["results"][1]['region']['area1']['name'];
+        var mysi =
+            jsonDecode(jsonData)["results"][1]['region']['area2']['name'];
+        var mydong =
+            jsonDecode(jsonData)["results"][1]['region']['area3']['name'];
+
+        String doSiDong = mydo + " " + mysi + " " + mydong;
+        return doSiDong;
+      } else {
+        throw Exception("주소를 찾지 못했습니다.");
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<List<Company>> fetchCompanies(String location) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.http(ip, '/api/v1/wasteCompany/', {'location': location});
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (accessToken != null) {
+      headers['Authorization'] = 'Bearer $accessToken';
+    }
+
+    try {
+      final response = await http.get(
+        url,
+        headers: headers,
+      );
 
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
@@ -39,6 +86,9 @@ class ApiService {
     final url = Uri.parse('http://$ip/api/v1/member/');
     String? accessToken = await _secureStorage.read(key: 'accessToken');
 
+    if (accessToken == null) {
+      throw Exception('토큰없음');
+    }
     return http.get(
       url,
       headers: {
@@ -46,6 +96,19 @@ class ApiService {
         'Content-Type': 'application/json',
       },
     );
+  }
+
+  Future<http.StreamedResponse> postWasteImage(File file) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/scan/');
+    var request = http.MultipartRequest('POST', url);
+
+    request.files.add(await http.MultipartFile.fromPath(
+      'file',
+      file.path,
+    ));
+
+    return await request.send();
   }
 
   // 카카오 로그인 정보 서버로 보내는 용도
