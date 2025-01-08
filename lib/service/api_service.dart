@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shotandshoot/service/token_service.dart';
 import '../models/company.dart';
 import '../models/memberInfo.dart';
+import '../models/question.dart';
 
 class ApiService {
   final TokenService tokenService = TokenService();
@@ -252,5 +253,28 @@ class ApiService {
         'Authorization': 'Bearer $accessToken',
       },
     );
+  }
+
+  // questionId에 해당하는 질문 가져오기
+  static Future<Question> getQuestion(
+    int questionId,
+  ) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/question/$questionId');
+    try {
+      final response = await http.get(url, headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',  // 요거랑
+      },);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes)); // 요거 안 넣으면 한글 깨짐
+        final question = Question.fromJson(data);
+        return question;
+      } else {
+        throw Exception("질문을 찾지 못했습니다.");
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 }

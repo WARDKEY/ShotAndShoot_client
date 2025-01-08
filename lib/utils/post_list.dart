@@ -21,7 +21,7 @@ class PostList extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => PostDetail(
-                    postId: post['id']!.toString(),
+                    questionId: post['id']!,
                   ),
                 ),
               );
