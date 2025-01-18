@@ -45,8 +45,10 @@ class _PostWriteState extends State<PostWrite> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white,
+
         title: Text('글쓰기'),
         centerTitle: true,
         actions: [
