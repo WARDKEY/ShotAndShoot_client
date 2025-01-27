@@ -101,7 +101,8 @@ class PostDetail extends StatelessWidget {
               const Spacer(),
               Row(
                 children: [
-                  const Icon(Icons.remove_red_eye, size: 16, color: Colors.grey),
+                  const Icon(Icons.remove_red_eye,
+                      size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
                   Text(
                     '${question.view}', // question.view

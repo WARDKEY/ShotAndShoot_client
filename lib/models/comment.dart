@@ -3,7 +3,7 @@ class Comment {
   final String content;
   final int questionId;
   final String member;
-  final DateTime createAt;
+  final String createAt;
 
   Comment(
       {required this.commentId,
@@ -14,10 +14,10 @@ class Comment {
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
-        commentId: json['commentId'],
-        content: json['content'],
-        questionId: json['questionId'],
-        member: json['member'],
-        createAt: json['createAt']);
+        commentId: json['commentId'] as int,
+        content: json['content'] as String,
+        questionId: json['questionId'] as int,
+        member: json['member'] as String,
+        createAt: json['createAt'] as String);
   }
 }
