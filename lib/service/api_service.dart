@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:shotandshoot/models/comment.dart';
 import 'package:shotandshoot/service/token_service.dart';
 import '../models/company.dart';
 import '../models/memberInfo.dart';
@@ -262,12 +263,16 @@ class ApiService {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/question/$questionId');
     try {
-      final response = await http.get(url, headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',  // 요거랑
-      },);
+      final response = await http.get(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8', // 요거랑
+        },
+      );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(response.bodyBytes)); // 요거 안 넣으면 한글 깨짐
+        final data =
+            jsonDecode(utf8.decode(response.bodyBytes)); // 요거 안 넣으면 한글 깨짐
         final question = Question.fromJson(data);
         return question;
       } else {
@@ -275,6 +280,42 @@ class ApiService {
       }
     } catch (e) {
       throw Exception(e);
+    }
+  }
+
+  // 질문 작성
+  static Future<Question> postQuestion(
+      String title, String content, String category) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/question/');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'title': title,
+          'content': content,
+          'category': category,
+        }),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return Question.fromJson(jsonDecode(response.body));
+      } else {
+        print('Error: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to post question');
+      }
+    } catch (e) {
+      print('HTTP POST 에러: $e');
+      throw Exception('Error: $e');
     }
   }
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shotandshoot/models/question.dart';
+
+import '../service/api_service.dart';
 
 class PostWrite extends StatefulWidget {
   const PostWrite({super.key});
@@ -48,7 +51,6 @@ class _PostWriteState extends State<PostWrite> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white,
-
         title: Text('글쓰기'),
         centerTitle: true,
         actions: [
@@ -63,6 +65,10 @@ class _PostWriteState extends State<PostWrite> {
                 ? () {
                     print(
                         '제목 : ${_titleController.text} 카테고리 : ${_categoryController.text} 내용 ${_contentController.text}');
+                    // 질문 작성
+                    ApiService.postQuestion(_titleController.text,
+                        _contentController.text, _categoryController.text);
+                    Navigator.pop(context);
                   }
                 : null,
             child: Text(

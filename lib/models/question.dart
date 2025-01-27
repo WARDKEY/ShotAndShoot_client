@@ -8,7 +8,7 @@ class Question {
   final String createAt;
 
   Question(
-      {required this.questionId,
+      { required this.questionId,
       required this.title,
       required this.content,
       required this.category,
