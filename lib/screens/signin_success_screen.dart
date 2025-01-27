@@ -24,14 +24,6 @@ class _SigninLoginScreenState extends State<SigninLoginScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.close,
-            color: Color(0xff748d6f),
-            size: 60,
-          ),
-          SizedBox(
-            height: 15,
-          ),
-          Icon(
             Icons.check_circle_outline,
             color: Color(0xff748d6f),
             size: 60,

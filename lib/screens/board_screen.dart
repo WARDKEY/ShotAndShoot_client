@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shotandshoot/screens/post_write.dart';
 import 'package:shotandshoot/utils/post_filter.dart';
 import 'package:shotandshoot/utils/post_list.dart';
 import 'package:shotandshoot/utils/post_search.dart';
@@ -10,8 +11,17 @@ class BoardScreen extends StatefulWidget {
   State<BoardScreen> createState() => _BoardScreenState();
 }
 
-class _BoardScreenState extends State<BoardScreen> with SingleTickerProviderStateMixin {
+class _BoardScreenState extends State<BoardScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
+
+  void navigateToPostWrite() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PostWrite(),
+      ),
+    );
+  }
 
   Map<String, bool> _filters = {
     "플라스틱": false,
@@ -84,8 +94,10 @@ class _BoardScreenState extends State<BoardScreen> with SingleTickerProviderStat
               controller: _tabController,
               labelColor: Color(0xff748d6f),
               unselectedLabelColor: Colors.grey,
-              indicatorColor: Color(0xff748d6f), // 강조선 색상
-              indicatorWeight: 4.0, // 강조선 두께
+              indicatorColor: Color(0xff748d6f),
+              // 강조선 색상
+              indicatorWeight: 4.0,
+              // 강조선 두께
               indicatorSize: TabBarIndicatorSize.tab,
               tabs: const [
                 Tab(text: "전체글"),
@@ -101,22 +113,28 @@ class _BoardScreenState extends State<BoardScreen> with SingleTickerProviderStat
               children: [
                 Column(
                   children: [
-                    PostSearch(onChanged: (value) {print('검색어: $value');},),
+                    PostSearch(
+                      onChanged: (value) {
+                        print('검색어: $value');
+                      },
+                    ),
                     Row(
                       children: [
                         PostFilter(filters: _filters, onApply: _applyFilters),
-
                         Expanded(
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal, // 가로로 스크롤
                             child: Row(
                               children: selectedFilters.map((filter) {
                                 return Padding(
-                                  padding: const EdgeInsets.only(right: 8.0), // 필터 간 간격 추가
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  // 필터 간 간격 추가
                                   child: Chip(
                                     label: Text(filter),
-                                    side: BorderSide(width: 1.0, color: Color(0xff748d6f)),
-                                    labelStyle: TextStyle(color: Color(0xff748d6f)),
+                                    side: BorderSide(
+                                        width: 1.0, color: Color(0xff748d6f)),
+                                    labelStyle:
+                                        TextStyle(color: Color(0xff748d6f)),
                                     backgroundColor: Colors.white,
                                     deleteIcon: Icon(Icons.clear),
                                     onDeleted: () {
@@ -133,7 +151,9 @@ class _BoardScreenState extends State<BoardScreen> with SingleTickerProviderStat
                         ),
                       ],
                     ),
-                    PostList(posts: posts,),
+                    PostList(
+                      posts: posts,
+                    ),
                   ],
                 ),
 
@@ -154,9 +174,9 @@ class _BoardScreenState extends State<BoardScreen> with SingleTickerProviderStat
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // 글쓰기 버튼 클릭 시의 동작
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("글쓰기 버튼 클릭됨")),
-          );
+
+          navigateToPostWrite();
+
         },
         backgroundColor: Color(0xff748d6f),
         child: const Icon(Icons.edit, color: Colors.white),
