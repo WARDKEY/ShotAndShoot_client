@@ -2,13 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:shotandshoot/models/question.dart';
 import 'package:shotandshoot/service/api_service.dart';
 
-class PostDetail extends StatelessWidget {
+class PostDetail extends StatefulWidget {
   final int questionId;
 
   const PostDetail({
     Key? key,
     required this.questionId,
   }) : super(key: key);
+
+  @override
+  State<PostDetail> createState() => _PostDetailState();
+}
+
+class _PostDetailState extends State<PostDetail> {
+  final TextEditingController _commentController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _updateFinishState() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +52,7 @@ class PostDetail extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: FutureBuilder<Question>(
-        future: ApiService.getQuestion(questionId), // 비동기 호출
+        future: ApiService.getQuestion(widget.questionId), // 비동기 호출
         builder: (context, snapshot) {
           // 연결 상태 분기 처리
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -188,8 +210,9 @@ class PostDetail extends StatelessWidget {
           // 댓글 입력 필드
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: TextField(
+                  controller: _commentController,
                   decoration: InputDecoration(
                     hintText: '댓글을 입력하세요',
                     border: OutlineInputBorder(),
@@ -201,6 +224,8 @@ class PostDetail extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // 댓글 등록 로직
+                  ApiService.postComment(
+                      widget.questionId, _commentController.text);
                 },
                 child: const Text(
                   '등록',

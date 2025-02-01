@@ -318,4 +318,39 @@ class ApiService {
       throw Exception('Error: $e');
     }
   }
+
+  // 댓글 작성
+  static Future<Comment> postComment(
+      int questionId, String content) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/comment/$questionId');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'content': content,
+        }),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return Comment.fromJson(jsonDecode(response.body));
+      } else {
+        print('Error: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to post comment');
+      }
+    } catch (e) {
+      print('HTTP POST 에러: $e');
+      throw Exception('Error: $e');
+    }
+  }
+
 }
