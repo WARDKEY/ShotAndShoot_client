@@ -21,9 +21,13 @@ class _PostDetailState extends State<PostDetail> {
   String? _aiComments;
   Question? _question;
 
+  // 현재 로그인한 사용자의 ID (실제 구현에 맞게 가져오세요)
+  String _currentUserId = "user123"; // 예시 값
+
   @override
   void initState() {
     super.initState();
+
     // AI 댓글 데이터 불러오기
     ApiService.fetchAiComment(widget.questionId).then((value) {
       print("ai 댓글 내용 : ${value.content}");
@@ -54,11 +58,21 @@ class _PostDetailState extends State<PostDetail> {
   // 댓글 등록 후 전체 댓글 목록 새로고침 및 입력 필드 초기화
   Future<void> _updateFinishState() async {
     List<Comment> updatedComments =
-        await ApiService.fetchComments(widget.questionId);
+    await ApiService.fetchComments(widget.questionId);
     setState(() {
       _comments = updatedComments;
       _commentController.clear();
     });
+  }
+
+  // 댓글 삭제 후 목록 업데이트
+  Future<void> _deleteComment(int commentId) async {
+    try {
+      await ApiService.deleteComment(commentId);
+      await _updateFinishState();
+    } catch (e) {
+      print('댓글 삭제 에러: $e');
+    }
   }
 
   @override
@@ -220,17 +234,22 @@ class _PostDetailState extends State<PostDetail> {
                 ),
                 Text(
                   '댓글 ${_comments.length}개',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 Expanded(
                   child: ListView.builder(
                     itemCount: _comments.length,
                     itemBuilder: (context, index) {
+                      final comment = _comments[index];
                       return Comments(
-                        author: _comments[index].memberId,
-                        time: _comments[index].createdAt,
-                        content: _comments[index].content,
+                        commentId: comment.commentId,
+                        author: comment.memberId,
+                        time: comment.createdAt,
+                        content: comment.content,
+                        currentUserId: _currentUserId, // 현재 로그인한 사용자 ID 전달
+                        onDelete: _deleteComment,
                       );
                     },
                   ),
@@ -259,7 +278,7 @@ class _PostDetailState extends State<PostDetail> {
                     // 댓글 등록 API 호출
                     await ApiService.postComment(
                         widget.questionId, _commentController.text);
-                    // 댓글 등록 후 목록 업데이트 및 입력창 초기화 (현재 안 됨)
+                    // 댓글 등록 후 목록 업데이트 및 입력창 초기화
                     await _updateFinishState();
                   } catch (e) {
                     print("댓글 등록 에러: $e");
@@ -280,25 +299,34 @@ class _PostDetailState extends State<PostDetail> {
   }
 }
 
-// 댓글 위젯
+// 댓글 위젯 (조건부 삭제 버튼 추가)
 class Comments extends StatelessWidget {
+  final int commentId;
   final String author;
   final String time;
   final String content;
+  final Function(int) onDelete;
+  final String currentUserId; // 현재 로그인한 사용자 ID
 
   const Comments({
     super.key,
+    required this.commentId,
     required this.author,
     required this.time,
     required this.content,
+    required this.onDelete,
+    required this.currentUserId,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 현재 사용자가 댓글 작성자인지 비교 (memberId는 String 타입)
+    bool isOwner = (author == currentUserId);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 0.0),
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(
               color: Colors.grey,
@@ -325,17 +353,19 @@ class Comments extends StatelessWidget {
                     ),
                   ],
                 ),
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () {
-                    print('댓글 삭제 완료');
-                  },
-                  icon: const Icon(
-                    Icons.delete,
-                    size: 16,
-                    color: Color(0xffac2323),
+                // 현재 로그인한 사용자와 댓글 작성자가 일치할 때만 삭제 버튼 표시
+                if (isOwner)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () async {
+                      await onDelete(commentId);
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                      size: 16,
+                      color: Color(0xffac2323),
+                    ),
                   ),
-                ),
               ],
             ),
             Padding(

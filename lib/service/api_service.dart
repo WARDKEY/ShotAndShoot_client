@@ -350,7 +350,7 @@ class ApiService {
   }
 
   // 댓글 작성
-  static Future<Comment> postComment(int questionId, String content) async {
+  static Future<void> postComment(int questionId, String comment) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/comment/$questionId');
     String? accessToken = await _secureStorage.read(key: 'accessToken');
@@ -363,7 +363,7 @@ class ApiService {
           'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode(<String, dynamic>{
-          'content': content,
+          'comment': comment,
         }),
       );
 
@@ -371,7 +371,8 @@ class ApiService {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        return Comment.fromJson(jsonDecode(response.body));
+        print("댓글 작성 완료");
+        return;
       } else {
         print('Error: ${response.statusCode} - ${response.body}');
         throw Exception('Failed to post comment');
@@ -408,4 +409,60 @@ class ApiService {
       throw Exception('Error: $e');
     }
   }
+
+  // 댓글 삭제
+  static Future<void> deleteComment(int commentId) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/comment/$commentId');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      print('DELETE Response status: ${response.statusCode}');
+      print('DELETE Response body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete comment');
+      }
+    } catch (e) {
+      print('HTTP DELETE 에러: $e');
+      throw Exception('Error: $e');
+    }
+  }
+
+  // 토큰으로 userId
+  static Future<void> getUserId(int commentId) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/comment/$commentId');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      print('DELETE Response status: ${response.statusCode}');
+      print('DELETE Response body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete comment');
+      }
+    } catch (e) {
+      print('HTTP DELETE 에러: $e');
+      throw Exception('Error: $e');
+    }
+  }
+
+
 }
