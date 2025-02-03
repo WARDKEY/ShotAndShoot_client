@@ -437,32 +437,53 @@ class ApiService {
     }
   }
 
-  // 토큰으로 userId
-  static Future<void> getUserId(int commentId) async {
+  // 현재 로그인한 사용자의 userId 가져오기
+  static Future<String> getUserId() async {
     String ip = dotenv.get('IP');
-    final url = Uri.parse('http://$ip/api/v1/comment/$commentId');
+    final url = Uri.parse('http://$ip/api/v1/member/user');
     String? accessToken = await _secureStorage.read(key: 'accessToken');
 
-    try {
-      final response = await http.get(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
 
-      print('DELETE Response status: ${response.statusCode}');
-      print('DELETE Response body: ${response.body}');
+    print('GET Response status: ${response.statusCode}');
+    print('GET Response body: ${response.body}');
 
-      if (response.statusCode != 200) {
-        throw Exception('Failed to delete comment');
-      }
-    } catch (e) {
-      print('HTTP DELETE 에러: $e');
-      throw Exception('Error: $e');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      return jsonResponse['userId'] as String;
+    } else {
+      throw Exception('Failed to get userId');
     }
   }
 
+  // commentId로 userId 조회
+  static Future<String> getUserIdFromCommentId(int commentId) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/comment/user/$commentId');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
 
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    print('GET Response status: ${response.statusCode}');
+    print('GET Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      return jsonResponse['userId'] as String;
+    } else {
+      throw Exception('Failed to get userId from commentId');
+    }
+  }
 }

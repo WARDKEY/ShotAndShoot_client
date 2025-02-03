@@ -21,12 +21,23 @@ class _PostDetailState extends State<PostDetail> {
   String? _aiComments;
   Question? _question;
 
-  // 현재 로그인한 사용자의 ID (실제 구현에 맞게 가져오세요)
-  String _currentUserId = "user123"; // 예시 값
+  // 현재 로그인한 사용자의 ID (실제 로그인 로직에 따라 할당)
+  String _currentUserId = "";
+
+  // 각 댓글(commentId)에 대한 작성자 userId를 저장하는 Map
+  final Map<int, String> _commentOwners = {};
 
   @override
   void initState() {
     super.initState();
+
+    // 로그인한 사용자의 userId 불러오기
+    ApiService.getUserId().then((value) {
+      print("현재 로그인한 userId 확인 ${value.toString()}");
+      setState(() {
+        _currentUserId = value.toString() ?? ""; // 로그아웃 시 빈 문자열 할당
+      });
+    });
 
     // AI 댓글 데이터 불러오기
     ApiService.fetchAiComment(widget.questionId).then((value) {
@@ -37,12 +48,7 @@ class _PostDetailState extends State<PostDetail> {
     });
 
     // 댓글 목록 불러오기
-    ApiService.fetchComments(widget.questionId).then((value) {
-      print("불러온 댓글 수: ${value.length}");
-      setState(() {
-        _comments = value;
-      });
-    });
+    _loadComments();
 
     // 질문 데이터 불러오기
     ApiService.fetchQuestion(widget.questionId).then((value) {
@@ -55,12 +61,35 @@ class _PostDetailState extends State<PostDetail> {
     });
   }
 
+  // 댓글 목록과 각 댓글의 작성자 정보(작성자 userId)를 불러오는 메서드
+  Future<void> _loadComments() async {
+    try {
+      List<Comment> fetchedComments =
+          await ApiService.fetchComments(widget.questionId);
+      setState(() {
+        _comments = fetchedComments;
+      });
+      // 각 댓글에 대해 작성자 userId를 가져옴
+      for (var comment in fetchedComments) {
+        try {
+          String owner =
+              await ApiService.getUserIdFromCommentId(comment.commentId);
+          setState(() {
+            _commentOwners[comment.commentId] = owner;
+          });
+        } catch (e) {
+          print('댓글 ${comment.commentId} 작성자 정보 가져오기 실패: $e');
+        }
+      }
+    } catch (e) {
+      print('댓글 목록 불러오기 에러: $e');
+    }
+  }
+
   // 댓글 등록 후 전체 댓글 목록 새로고침 및 입력 필드 초기화
   Future<void> _updateFinishState() async {
-    List<Comment> updatedComments =
-    await ApiService.fetchComments(widget.questionId);
+    await _loadComments();
     setState(() {
-      _comments = updatedComments;
       _commentController.clear();
     });
   }
@@ -83,7 +112,7 @@ class _PostDetailState extends State<PostDetail> {
 
   @override
   Widget build(BuildContext context) {
-    // _question이 null이면 로딩
+    // _question이 null이면 로딩 표시
     if (_question == null) {
       return Scaffold(
         appBar: AppBar(
@@ -210,10 +239,15 @@ class _PostDetailState extends State<PostDetail> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  _aiComments ?? '로딩 중...',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w400,
+                SizedBox(
+                  height: 150,
+                  child: SingleChildScrollView(
+                    child: Text(
+                      _aiComments ?? '로딩 중...',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -243,12 +277,15 @@ class _PostDetailState extends State<PostDetail> {
                     itemCount: _comments.length,
                     itemBuilder: (context, index) {
                       final comment = _comments[index];
-                      return Comments(
+                      // _commentOwners[comment.commentId]
+                      String? owner = _commentOwners[comment.commentId];
+                      return CommentItem(
                         commentId: comment.commentId,
-                        author: comment.memberId,
+                        userId: owner,
+                        memberName: comment.memberName,
                         time: comment.createdAt,
                         content: comment.content,
-                        currentUserId: _currentUserId, // 현재 로그인한 사용자 ID 전달
+                        currentUserId: _currentUserId,
                         onDelete: _deleteComment,
                       );
                     },
@@ -300,28 +337,30 @@ class _PostDetailState extends State<PostDetail> {
 }
 
 // 댓글 위젯 (조건부 삭제 버튼 추가)
-class Comments extends StatelessWidget {
+class CommentItem extends StatelessWidget {
   final int commentId;
-  final String author;
+  final String? userId; // API를 통해 받아온 댓글 작성자 userId (null일 수 있음)
+  final String memberName;
   final String time;
   final String content;
   final Function(int) onDelete;
   final String currentUserId; // 현재 로그인한 사용자 ID
 
-  const Comments({
-    super.key,
+  const CommentItem({
+    Key? key,
     required this.commentId,
-    required this.author,
+    required this.userId,
+    required this.memberName,
     required this.time,
     required this.content,
     required this.onDelete,
     required this.currentUserId,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // 현재 사용자가 댓글 작성자인지 비교 (memberId는 String 타입)
-    bool isOwner = (author == currentUserId);
+    // API로 받아온 owner가 null이면 아직 로딩 중으로 간주하고, 로딩 중일 때는 삭제 버튼을 표시하지 않습니다.
+    bool isOwner = (userId != null && userId == currentUserId);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 0.0),
@@ -343,7 +382,7 @@ class Comments extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      author,
+                      memberName,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 8),
@@ -353,7 +392,7 @@ class Comments extends StatelessWidget {
                     ),
                   ],
                 ),
-                // 현재 로그인한 사용자와 댓글 작성자가 일치할 때만 삭제 버튼 표시
+                // 현재 로그인한 사용자와 API로 받아온 댓글 작성자가 일치할 때만 삭제 버튼 표시
                 if (isOwner)
                   IconButton(
                     visualDensity: VisualDensity.compact,
