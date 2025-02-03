@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shotandshoot/models/comment.dart';
 import 'package:shotandshoot/models/question.dart';
 import 'package:shotandshoot/service/api_service.dart';
 
@@ -16,14 +17,48 @@ class PostDetail extends StatefulWidget {
 
 class _PostDetailState extends State<PostDetail> {
   final TextEditingController _commentController = TextEditingController();
+  List<Comment> _comments = <Comment>[];
+  String? _aiComments;
+  Question? _question;
 
   @override
   void initState() {
     super.initState();
+    // AI 댓글 데이터 불러오기
+    ApiService.fetchAiComment(widget.questionId).then((value) {
+      print("ai 댓글 내용 : ${value.content}");
+      setState(() {
+        _aiComments = value.content;
+      });
+    });
+
+    // 댓글 목록 불러오기
+    ApiService.fetchComments(widget.questionId).then((value) {
+      print("불러온 댓글 수: ${value.length}");
+      setState(() {
+        _comments = value;
+      });
+    });
+
+    // 질문 데이터 불러오기
+    ApiService.fetchQuestion(widget.questionId).then((value) {
+      print("질문 내용 : ${value.content}");
+      setState(() {
+        _question = value;
+      });
+    }).catchError((error) {
+      print("질문 불러오기 에러: $error");
+    });
   }
 
-  void _updateFinishState() {
-    setState(() {});
+  // 댓글 등록 후 전체 댓글 목록 새로고침 및 입력 필드 초기화
+  Future<void> _updateFinishState() async {
+    List<Comment> updatedComments =
+        await ApiService.fetchComments(widget.questionId);
+    setState(() {
+      _comments = updatedComments;
+      _commentController.clear();
+    });
   }
 
   @override
@@ -34,7 +69,28 @@ class _PostDetailState extends State<PostDetail> {
 
   @override
   Widget build(BuildContext context) {
-    // FutureBuilder 위젯을 사용해 API 결과를 가져옴
+    // _question이 null이면 로딩
+    if (_question == null) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: const Text(
+            '게시판',
+            style: TextStyle(color: Colors.black),
+          ),
+          shape: const Border(
+            bottom: BorderSide(
+              color: Colors.grey,
+              width: 1,
+            ),
+          ),
+          centerTitle: true,
+          iconTheme: const IconThemeData(color: Colors.black),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -51,33 +107,11 @@ class _PostDetailState extends State<PostDetail> {
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: FutureBuilder<Question>(
-        future: ApiService.getQuestion(widget.questionId), // 비동기 호출
-        builder: (context, snapshot) {
-          // 연결 상태 분기 처리
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // 아직 로딩 중
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            // 에러 발생
-            return Center(child: Text('에러: ${snapshot.error}'));
-          } else if (!snapshot.hasData) {
-            // 데이터가 없는 경우
-            return const Center(child: Text('데이터가 없습니다.'));
-          }
-
-          // 여기까지 오면 snapshot.data가 존재 (Question 객체)
-          final question = snapshot.data!;
-
-          print(question.content);
-
-          return _buildBody(context, question);
-        },
-      ),
+      body: _buildBody(context, _question!),
     );
   }
 
-  /// 실제 UI를 그리는 부분을 함수로 분리
+  /// 실제 UI를 그리는 메소드
   Widget _buildBody(BuildContext context, Question question) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16),
@@ -94,14 +128,14 @@ class _PostDetailState extends State<PostDetail> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  question.category, // question.category
+                  question.category,
                   style: const TextStyle(color: Colors.blue, fontSize: 12),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  question.title, // question.title
+                  question.title,
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -109,10 +143,11 @@ class _PostDetailState extends State<PostDetail> {
             ],
           ),
           const SizedBox(height: 8),
+          // 작성자 및 조회수
           Row(
             children: [
               Text(
-                question.member, // question.member
+                question.member,
                 style: const TextStyle(color: Colors.grey),
               ),
               const SizedBox(width: 10),
@@ -127,7 +162,7 @@ class _PostDetailState extends State<PostDetail> {
                       size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
                   Text(
-                    '${question.view}', // question.view
+                    '${question.view}',
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ],
@@ -135,13 +170,13 @@ class _PostDetailState extends State<PostDetail> {
             ],
           ),
           const SizedBox(height: 16),
-          // 본문 내용
+          // 질문 내용
           Text(
-            question.content, // question.content
+            question.content,
             style: const TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 20),
-          // AI 코멘트
+          // AI 코멘트 영역
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -152,21 +187,21 @@ class _PostDetailState extends State<PostDetail> {
             padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   'AI 코멘트',
                   style: TextStyle(
-                    color: Color(0xff748d6f),
+                    color: const Color(0xff748d6f),
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  '빗자루로 유리 쓸어서 신문지에 감싸 버리삼',
-                  style: TextStyle(
+                  _aiComments ?? '로딩 중...',
+                  style: const TextStyle(
                     fontWeight: FontWeight.w400,
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -183,37 +218,33 @@ class _PostDetailState extends State<PostDetail> {
                     thickness: 1.0,
                   ),
                 ),
-                const Text(
-                  '댓글 2개',
+                Text(
+                  '댓글 ${_comments.length}개',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 Expanded(
-                  child: ListView(
-                    children: const [
-                      Comments(
-                        author: '영희',
-                        time: '11:32',
-                        content: '착하게 살아야지dddddddddddddddddddddddddddddddddddd',
-                      ),
-                      Comments(
-                        author: '훈이',
-                        time: '11:11',
-                        content: 'ㅋㅋ',
-                      ),
-                    ],
+                  child: ListView.builder(
+                    itemCount: _comments.length,
+                    itemBuilder: (context, index) {
+                      return Comments(
+                        author: _comments[index].memberId,
+                        time: _comments[index].createdAt,
+                        content: _comments[index].content,
+                      );
+                    },
                   ),
                 ),
               ],
             ),
           ),
-          // 댓글 입력 필드
+          // 댓글 입력 영역
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _commentController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: '댓글을 입력하세요',
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(horizontal: 12),
@@ -222,10 +253,17 @@ class _PostDetailState extends State<PostDetail> {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: () {
-                  // 댓글 등록 로직
-                  ApiService.postComment(
-                      widget.questionId, _commentController.text);
+                onPressed: () async {
+                  if (_commentController.text.isEmpty) return;
+                  try {
+                    // 댓글 등록 API 호출
+                    await ApiService.postComment(
+                        widget.questionId, _commentController.text);
+                    // 댓글 등록 후 목록 업데이트 및 입력창 초기화 (현재 안 됨)
+                    await _updateFinishState();
+                  } catch (e) {
+                    print("댓글 등록 에러: $e");
+                  }
                 },
                 child: const Text(
                   '등록',
@@ -242,7 +280,7 @@ class _PostDetailState extends State<PostDetail> {
   }
 }
 
-// 댓글
+// 댓글 위젯
 class Comments extends StatelessWidget {
   final String author;
   final String time;
@@ -278,24 +316,21 @@ class Comments extends StatelessWidget {
                   children: [
                     Text(
                       author,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(
-                      width: 8,
-                    ),
+                    const SizedBox(width: 8),
                     Text(
                       time,
-                      style: TextStyle(color: Colors.grey),
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ],
                 ),
                 IconButton(
                   visualDensity: VisualDensity.compact,
-                  // 댓글 삭제
                   onPressed: () {
                     print('댓글 삭제 완료');
                   },
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.delete,
                     size: 16,
                     color: Color(0xffac2323),
@@ -307,9 +342,7 @@ class Comments extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
               child: Text(content),
             ),
-            SizedBox(
-              height: 12,
-            ),
+            const SizedBox(height: 12),
           ],
         ),
       ),

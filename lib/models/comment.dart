@@ -3,14 +3,14 @@ class Comment {
   final String content;
   final int questionId;
   final String memberId;
-  final String createAt;
+  final String createdAt;
 
   Comment(
       {required this.commentId,
       required this.content,
       required this.questionId,
       required this.memberId,
-      required this.createAt});
+      required this.createdAt});
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
@@ -18,6 +18,6 @@ class Comment {
         content: json['content'] as String,
         questionId: json['questionId'] as int,
         memberId: json['memberId'] as String,
-        createAt: json['createAt'] as String);
+        createdAt: json['createdAt'] as String);
   }
 }

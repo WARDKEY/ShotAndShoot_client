@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:shotandshoot/models/comment.dart';
 import 'package:shotandshoot/service/token_service.dart';
+
+import '../models/AiComments.dart';
 import '../models/company.dart';
 import '../models/memberInfo.dart';
 import '../models/question.dart';
@@ -257,7 +260,7 @@ class ApiService {
   }
 
   // questionId에 해당하는 질문 가져오기
-  static Future<Question> getQuestion(
+  static Future<Question> fetchQuestion(
     int questionId,
   ) async {
     String ip = dotenv.get('IP');
@@ -319,9 +322,35 @@ class ApiService {
     }
   }
 
+  // ai 댓글 가져오기
+  static Future<AiComments> fetchAiComment(
+    int questionId,
+  ) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/ai/$questionId');
+    try {
+      final response = await http.get(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8', // 요거랑
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data =
+            jsonDecode(utf8.decode(response.bodyBytes)); // 요거 안 넣으면 한글 깨짐
+        final aiComment = AiComments.fromJson(data);
+        return aiComment;
+      } else {
+        throw Exception("ai 댓글을 찾지 못했습니다.");
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
   // 댓글 작성
-  static Future<Comment> postComment(
-      int questionId, String content) async {
+  static Future<Comment> postComment(int questionId, String content) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/comment/$questionId');
     String? accessToken = await _secureStorage.read(key: 'accessToken');
@@ -353,4 +382,30 @@ class ApiService {
     }
   }
 
+  // 게시글 내 댓글 목록 조회
+  static Future<List<Comment>> fetchComments(int questionId) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.http(ip, '/api/v1/comment/$questionId');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final List<dynamic> jsonList = jsonDecode(decodedBody) as List<dynamic>;
+
+        return jsonList
+            .map((json) => Comment.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Failed to load comments');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
 }
