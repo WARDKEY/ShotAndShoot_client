@@ -2,22 +2,24 @@ class Comment {
   final int commentId;
   final String content;
   final int questionId;
-  final String member;
-  final String createAt;
+  final String memberName;
+  final String createdAt;
 
-  Comment(
-      {required this.commentId,
-      required this.content,
-      required this.questionId,
-      required this.member,
-      required this.createAt});
+  Comment({
+    required this.commentId,
+    required this.content,
+    required this.questionId,
+    required this.memberName,
+    required this.createdAt,
+  });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
-        commentId: json['commentId'] as int,
-        content: json['content'] as String,
-        questionId: json['questionId'] as int,
-        member: json['member'] as String,
-        createAt: json['createAt'] as String);
+      commentId: json['commentId'] as int,
+      content: json['content'] as String,
+      questionId: json['questionId'] as int,
+      memberName: json['memberName'] as String,
+      createdAt: json['createdAt'] as String,
+    );
   }
 }

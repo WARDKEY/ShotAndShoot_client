@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:shotandshoot/models/comment.dart';
 import 'package:shotandshoot/service/token_service.dart';
+
+import '../models/AiComments.dart';
 import '../models/company.dart';
 import '../models/memberInfo.dart';
 import '../models/question.dart';
@@ -257,7 +260,7 @@ class ApiService {
   }
 
   // questionId에 해당하는 질문 가져오기
-  static Future<Question> getQuestion(
+  static Future<Question> fetchQuestion(
     int questionId,
   ) async {
     String ip = dotenv.get('IP');
@@ -316,6 +319,171 @@ class ApiService {
     } catch (e) {
       print('HTTP POST 에러: $e');
       throw Exception('Error: $e');
+    }
+  }
+
+  // ai 댓글 가져오기
+  static Future<AiComments> fetchAiComment(
+    int questionId,
+  ) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/ai/$questionId');
+    try {
+      final response = await http.get(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8', // 요거랑
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data =
+            jsonDecode(utf8.decode(response.bodyBytes)); // 요거 안 넣으면 한글 깨짐
+        final aiComment = AiComments.fromJson(data);
+        return aiComment;
+      } else {
+        throw Exception("ai 댓글을 찾지 못했습니다.");
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  // 댓글 작성
+  static Future<void> postComment(int questionId, String comment) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/comment/$questionId');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'comment': comment,
+        }),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print("댓글 작성 완료");
+        return;
+      } else {
+        print('Error: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to post comment');
+      }
+    } catch (e) {
+      print('HTTP POST 에러: $e');
+      throw Exception('Error: $e');
+    }
+  }
+
+  // 게시글 내 댓글 목록 조회
+  static Future<List<Comment>> fetchComments(int questionId) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.http(ip, '/api/v1/comment/$questionId');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final List<dynamic> jsonList = jsonDecode(decodedBody) as List<dynamic>;
+
+        return jsonList
+            .map((json) => Comment.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Failed to load comments');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  // 댓글 삭제
+  static Future<void> deleteComment(int commentId) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/comment/$commentId');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      print('DELETE Response status: ${response.statusCode}');
+      print('DELETE Response body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete comment');
+      }
+    } catch (e) {
+      print('HTTP DELETE 에러: $e');
+      throw Exception('Error: $e');
+    }
+  }
+
+  // 현재 로그인한 사용자의 userId 가져오기
+  static Future<String> getUserId() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/member/user');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    print('GET Response status: ${response.statusCode}');
+    print('GET Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      return jsonResponse['userId'] as String;
+    } else {
+      throw Exception('Failed to get userId');
+    }
+  }
+
+  // commentId로 userId 조회
+  static Future<String> getUserIdFromCommentId(int commentId) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/comment/user/$commentId');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    print('GET Response status: ${response.statusCode}');
+    print('GET Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      return jsonResponse['userId'] as String;
+    } else {
+      throw Exception('Failed to get userId from commentId');
     }
   }
 }
