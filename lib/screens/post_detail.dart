@@ -9,9 +9,9 @@ class PostDetail extends StatefulWidget {
   final int questionId;
 
   const PostDetail({
-    Key? key,
+    super.key,
     required this.questionId,
-  }) : super(key: key);
+  });
 
   @override
   State<PostDetail> createState() => _PostDetailState();

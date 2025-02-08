@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shotandshoot/models/question.dart';
+import 'package:shotandshoot/screens/board_screen.dart';
+import 'package:shotandshoot/screens/post_detail.dart';
 
 import '../service/api_service.dart';
 
 class PostWrite extends StatefulWidget {
-  const PostWrite({super.key});
+  final VoidCallback onRefresh; // BoardScreen에서 전달한 콜백
+
+  const PostWrite({super.key, required this.onRefresh});
 
   @override
   State<PostWrite> createState() => _PostWriteState();
@@ -67,7 +71,11 @@ class _PostWriteState extends State<PostWrite> {
                         '제목 : ${_titleController.text} 카테고리 : ${_categoryController.text} 내용 ${_contentController.text}');
                     // 질문 작성
                     ApiService.postQuestion(_titleController.text,
-                        _contentController.text, _categoryController.text);
+                            _contentController.text, _categoryController.text)
+                        .then((value) {
+                      widget.onRefresh;
+                    });
+                    // Navigator.pop(context);
                     Navigator.pop(context);
                   }
                 : null,
