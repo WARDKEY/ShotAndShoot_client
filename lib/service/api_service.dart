@@ -437,6 +437,35 @@ class ApiService {
     }
   }
 
+  // 해당 사용자의 모든 댓글 조회
+  Future<List<Comment>> fetchMyComments() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.http(ip, '/api/v1/comment/my');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $accessToken',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final List<dynamic> jsonList = jsonDecode(decodedBody) as List<dynamic>;
+
+        return jsonList
+            .map((json) => Comment.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Failed to load comments');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
   // 현재 로그인한 사용자의 userId 가져오기
   static Future<String> getUserId() async {
     String ip = dotenv.get('IP');
@@ -484,6 +513,62 @@ class ApiService {
       return jsonResponse['userId'] as String;
     } else {
       throw Exception('Failed to get userId from commentId');
+    }
+  }
+
+  // 모든 게시글(질문) 조회
+  static Future<List<Question>> fetchPosts() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.http(ip, '/api/v1/question/');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final List<dynamic> jsonList = jsonDecode(decodedBody) as List<dynamic>;
+
+        return jsonList
+            .map((json) => Question.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Failed to load questions');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  // 특정 사용자가 작성한 모든 게시글(질문) 조회
+  Future<List<Question>> fetchMyPosts() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.http(ip, '/api/v1/question/my');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $accessToken',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final List<dynamic> jsonList = jsonDecode(decodedBody) as List<dynamic>;
+
+        return jsonList
+            .map((json) => Question.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Failed to load questions');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
     }
   }
 }

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shotandshoot/models/question.dart';
 import 'package:shotandshoot/screens/post_write.dart';
+import 'package:shotandshoot/service/api_service.dart';
 import 'package:shotandshoot/utils/post_filter.dart';
-import 'package:shotandshoot/utils/post_list.dart';
 import 'package:shotandshoot/utils/post_search.dart';
+
+import '../utils/question_list.dart';
 
 class BoardScreen extends StatefulWidget {
   const BoardScreen({super.key});
@@ -14,14 +17,6 @@ class BoardScreen extends StatefulWidget {
 class _BoardScreenState extends State<BoardScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  void navigateToPostWrite() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const PostWrite(),
-      ),
-    );
-  }
 
   Map<String, bool> _filters = {
     "플라스틱": false,
@@ -45,34 +40,31 @@ class _BoardScreenState extends State<BoardScreen>
     print("선택된 필터: $selectedFilters");
   }
 
-  List<Map<String, dynamic>> posts = [
-    {
-      'id': 1,
-      'category': '플라스틱',
-      'title': '게시물 1',
-      'content': '게시물 내용ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ',
-      'nickname': '홍길동',
-      'createdAt': '12:00',
-      'views': 100,
-      'comments': 3
-    },
-    {
-      'id': 2,
-      'category': '유리',
-      'title': '게시물 2',
-      'content': '게시물 내용 2',
-      'nickname': '닉네임 2',
-      'createdAt': '12/20',
-      'views': 200,
-      'comments': 0
-    },
-    // 더 많은 게시물 추가 가능
-  ];
+  List<Question> posts = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this); // 두 개의 탭
+
+    refresh();
+  }
+
+  void refresh() {
+    ApiService.fetchPosts().then((value) {
+      print("전체 질문들 $value");
+      setState(() {
+        posts = value;
+      });
+    });
+  }
+
+  void navigateToPostWrite() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PostWrite(onRefresh: refresh,),
+      ),
+    );
   }
 
   @override
@@ -134,7 +126,7 @@ class _BoardScreenState extends State<BoardScreen>
                                     side: BorderSide(
                                         width: 1.0, color: Color(0xff748d6f)),
                                     labelStyle:
-                                        TextStyle(color: Color(0xff748d6f)),
+                                    TextStyle(color: Color(0xff748d6f)),
                                     backgroundColor: Colors.white,
                                     deleteIcon: Icon(Icons.clear),
                                     onDeleted: () {
@@ -151,8 +143,9 @@ class _BoardScreenState extends State<BoardScreen>
                         ),
                       ],
                     ),
-                    PostList(
+                    QuestionList(
                       posts: posts,
+                      onRefresh: refresh,
                     ),
                   ],
                 ),
@@ -176,7 +169,6 @@ class _BoardScreenState extends State<BoardScreen>
           // 글쓰기 버튼 클릭 시의 동작
 
           navigateToPostWrite();
-
         },
         backgroundColor: Color(0xff748d6f),
         child: const Icon(Icons.edit, color: Colors.white),
