@@ -571,4 +571,31 @@ class ApiService {
       throw Exception('Error: $e');
     }
   }
+
+  // 인기글 조회
+  static Future<List<Question>> fetchPopularPosts() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.http(ip, '/api/v1/question/popular');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        final List<dynamic> jsonList = jsonDecode(decodedBody) as List<dynamic>;
+
+        return jsonList
+            .map((json) => Question.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        throw Exception('Failed to load popular questions');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
 }
