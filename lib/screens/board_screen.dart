@@ -42,12 +42,15 @@ class _BoardScreenState extends State<BoardScreen>
 
   List<Question> posts = [];
 
+  List<Question> popularPosts = [];
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this); // 두 개의 탭
 
     refresh();
+    popularRefresh();
   }
 
   void refresh() {
@@ -59,10 +62,21 @@ class _BoardScreenState extends State<BoardScreen>
     });
   }
 
+  void popularRefresh() {
+    ApiService.fetchPopularPosts().then((value) {
+      print("인기 질문들 $value");
+      setState(() {
+        popularPosts = value.toList();
+      });
+    });
+  }
+
   void navigateToPostWrite() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => PostWrite(onRefresh: refresh,),
+        builder: (context) => PostWrite(
+          onRefresh: refresh,
+        ),
       ),
     );
   }
@@ -126,7 +140,7 @@ class _BoardScreenState extends State<BoardScreen>
                                     side: BorderSide(
                                         width: 1.0, color: Color(0xff748d6f)),
                                     labelStyle:
-                                    TextStyle(color: Color(0xff748d6f)),
+                                        TextStyle(color: Color(0xff748d6f)),
                                     backgroundColor: Colors.white,
                                     deleteIcon: Icon(Icons.clear),
                                     onDeleted: () {
@@ -151,14 +165,15 @@ class _BoardScreenState extends State<BoardScreen>
                 ),
 
                 // 인기글 탭 콘텐츠
-                ListView.builder(
-                  itemCount: 30,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text("인기글 게시글 #$index"),
-                    );
-                  },
-                ),
+                // ListView.builder(
+                //   itemCount: 30,
+                //   itemBuilder: (context, index) {
+                //     return ListTile(
+                //       title: Text("인기글 게시글 #$index"),
+                //     );
+                //   },
+                // ),
+                QuestionList(posts: popularPosts, onRefresh: popularRefresh)
               ],
             ),
           ),

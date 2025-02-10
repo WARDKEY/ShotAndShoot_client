@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shotandshoot/models/comment.dart';
 import 'package:shotandshoot/models/question.dart';
 import 'package:shotandshoot/service/api_service.dart';
+import 'package:shotandshoot/service/token_service.dart';
 
 import '../utils/comment_item.dart';
 
@@ -22,6 +23,8 @@ class _PostDetailState extends State<PostDetail> {
   List<Comment> _comments = <Comment>[];
   String? _aiComments;
   Question? _question;
+  final TokenService _tokenService = TokenService();
+  bool _isLoggedIn = false;
 
   // 현재 로그인한 사용자의 ID (실제 로그인 로직에 따라 할당)
   String _currentUserId = "";
@@ -29,9 +32,19 @@ class _PostDetailState extends State<PostDetail> {
   // 각 댓글(commentId)에 대한 작성자 userId를 저장하는 Map
   final Map<int, String> _commentOwners = {};
 
+  Future<void> _checkLogin() async {
+    bool loggedIn = await _tokenService.isLoggedIn();
+    setState(() {
+      _isLoggedIn = loggedIn;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+
+    // 로그인 여부 확인
+    _checkLogin();
 
     // 로그인한 사용자의 userId 불러오기
     ApiService.getUserId().then((value) {
@@ -301,6 +314,7 @@ class _PostDetailState extends State<PostDetail> {
             children: [
               Expanded(
                 child: TextField(
+                  enabled: _isLoggedIn,
                   controller: _commentController,
                   decoration: const InputDecoration(
                     hintText: '댓글을 입력하세요',
@@ -311,18 +325,20 @@ class _PostDetailState extends State<PostDetail> {
               ),
               const SizedBox(width: 8),
               ElevatedButton(
-                onPressed: () async {
-                  if (_commentController.text.isEmpty) return;
-                  try {
-                    // 댓글 등록 API 호출
-                    await ApiService.postComment(
-                        widget.questionId, _commentController.text);
-                    // 댓글 등록 후 목록 업데이트 및 입력창 초기화
-                    await _updateFinishState();
-                  } catch (e) {
-                    print("댓글 등록 에러: $e");
-                  }
-                },
+                onPressed: _isLoggedIn
+                    ? () async {
+                        if (_commentController.text.isEmpty) return;
+                        try {
+                          // 댓글 등록 API 호출
+                          await ApiService.postComment(
+                              widget.questionId, _commentController.text);
+                          // 댓글 등록 후 목록 업데이트 및 입력창 초기화
+                          await _updateFinishState();
+                        } catch (e) {
+                          print("댓글 등록 에러: $e");
+                        }
+                      }
+                    : null,
                 child: const Text(
                   '등록',
                   style: TextStyle(
@@ -337,4 +353,3 @@ class _PostDetailState extends State<PostDetail> {
     );
   }
 }
-

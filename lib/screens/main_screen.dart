@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:provider/provider.dart';
 import 'package:shotandshoot/utils/post_list.dart';
+import 'package:shotandshoot/utils/question_list.dart';
 
+import '../models/question.dart';
 import '../provider/app_state_provider.dart';
+import '../service/api_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -13,7 +16,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
   final List<Map<String, dynamic>> gridItems = [
     {'icon': Icons.receipt, 'name': '종이류'},
     {'icon': Icons.receipt, 'name': '고철'},
@@ -25,33 +27,27 @@ class _MainScreenState extends State<MainScreen> {
     {'icon': Icons.receipt, 'name': '의류'},
   ];
 
-  List<Map<String, dynamic>> posts = [
-    {
-      'id': 1,
-      'category': '플라스틱',
-      'title': '게시물 1',
-      'content': '게시물 내용ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ',
-      'nickname': '홍길동',
-      'createdAt': '12:00',
-      'views': 100,
-      'comments': 3
-    },
-    {
-      'id': 2,
-      'category': '유리',
-      'title': '게시물 2',
-      'content': '게시물 내용 2',
-      'nickname': '닉네임 2',
-      'createdAt': '12/20',
-      'views': 200,
-      'comments': 0
-    },
-    // 더 많은 게시물 추가 가능
-  ];
+
+
+  List<Question> posts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    refresh();
+  }
+
+  void refresh() {
+    ApiService.fetchPopularPosts().then((value) {
+      print("인기 질문들 $value");
+      setState(() {
+        posts = value.take(5).toList(); // 리스트에서 최대 5개만 저장
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -173,7 +169,8 @@ class _MainScreenState extends State<MainScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),
                     ),
-                    elevation: 1, // 그림자 효과
+                    elevation: 1,
+                    // 그림자 효과
                     child: Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Column(
@@ -227,14 +224,21 @@ class _MainScreenState extends State<MainScreen> {
                           fontWeight: FontWeight.bold,
                           color: Colors.black),
                     ),
-                    Icon(
-                      Icons.refresh,
-                      size: 30,
+                    // 인기 질문 새로고침
+                    IconButton(
+                      icon: Icon(
+                        Icons.refresh,
+                        size: 30,
+                      ),
+                      onPressed: refresh,
                     ),
                   ],
                 ),
               ),
-              PostList(posts: posts,),
+              QuestionList(
+                posts: posts,
+                onRefresh: refresh,
+              ),
               Container(
                 width: double.maxFinite,
                 padding: EdgeInsets.fromLTRB(15, 0, 15, 45),
@@ -243,15 +247,15 @@ class _MainScreenState extends State<MainScreen> {
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.white,
                     side: BorderSide(
-                      color: Colors.grey,    // 테두리 색상
+                      color: Colors.grey, // 테두리 색상
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(4), // 모서리 둥글게
+                      borderRadius: BorderRadius.circular(4), // 모서리 둥글게
                     ),
                   ),
                   onPressed: () {
-                    Provider.of<AppState>(context, listen: false).onItemTapped(1);
+                    Provider.of<AppState>(context, listen: false)
+                        .onItemTapped(1);
                   },
                   child: Text('더보기 >'),
                 ),
