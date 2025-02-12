@@ -5,20 +5,37 @@ import '../screens/post_detail.dart';
 class QuestionList extends StatelessWidget {
   final List<Question> posts;
   final VoidCallback onRefresh; // BoardScreen에서 전달한 콜백
+  final List<String> selectedFilters; // 선택된 필터 목록 추가
 
   const QuestionList({
     super.key,
     required this.posts,
     required this.onRefresh,
+    required this.selectedFilters, // 선택된 필터 목록 초기화
   });
+
+  // 필터링된 게시글 목록을 반환하는 함수
+  List<Question> get _filteredPosts {
+    if (selectedFilters.isEmpty) {
+      return posts; // 필터가 선택되지 않았으면 모든 게시글 반환
+    } else {
+      return posts.where((post) {
+        // 각 게시글의 카테고리가 선택된 필터에 포함되는지 확인
+        return selectedFilters.contains(post.category);
+      }).toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // 필터링된 게시글 목록 사용
+    List<Question> displayPosts = _filteredPosts;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(15, 5, 15, 7),
       child: Column(
-        children: posts.map((post) {
-          bool isLastPost = posts.indexOf(post) == posts.length - 1;
+        children: displayPosts.map((post) { // _filteredPosts로 변경
+          bool isLastPost = displayPosts.indexOf(post) == displayPosts.length - 1; // displayPosts로 변경
           return GestureDetector(
             onTap: () {
               // 게시글 클릭 시 상세 화면으로 이동 후, 복귀하면 onRefresh 호출
@@ -86,7 +103,7 @@ class QuestionList extends StatelessWidget {
               ],
             ),
           );
-        }).toList(),
+        }).toList(), // displayPosts.map의 toList() 호출
       ),
     );
   }

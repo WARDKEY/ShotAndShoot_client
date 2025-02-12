@@ -238,6 +238,7 @@ class _MainScreenState extends State<MainScreen> {
               QuestionList(
                 posts: posts,
                 onRefresh: refresh,
+                selectedFilters: [],
               ),
               Container(
                 width: double.maxFinite,

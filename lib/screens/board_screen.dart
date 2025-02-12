@@ -178,6 +178,7 @@ class _BoardScreenState extends State<BoardScreen>
                     QuestionList(
                       posts: filteredPosts,
                       onRefresh: refresh,
+                      selectedFilters: selectedFilters,
                     ),
                   ],
                 ),
@@ -186,9 +187,14 @@ class _BoardScreenState extends State<BoardScreen>
                   child: QuestionList(
                     posts: filteredPosts,
                     onRefresh: refresh,
+                    selectedFilters: selectedFilters,
                   ),
                 ),
-                QuestionList(posts: popularPosts, onRefresh: popularRefresh)
+                QuestionList(
+                  posts: popularPosts,
+                  onRefresh: popularRefresh,
+                  selectedFilters: selectedFilters,
+                )
               ],
             ),
           ),
