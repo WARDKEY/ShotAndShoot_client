@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../service/api_service.dart';
 
 class PostWrite extends StatefulWidget {
-  final VoidCallback onRefresh;
-
-  const PostWrite({super.key, required this.onRefresh});
+  const PostWrite({super.key});
 
   @override
   State<PostWrite> createState() => _PostWriteState();
@@ -64,11 +62,9 @@ class _PostWriteState extends State<PostWrite> {
             onPressed: isFinish()
                 ? () {
                     ApiService.postQuestion(_titleController.text,
-                            _contentController.text, _selectedCategory!)
-                        .then((value) {
-                      widget.onRefresh();
-                    });
-                    Navigator.pop(context);
+                        _contentController.text, _selectedCategory!);
+                    // Navigator.pop(context);
+                    Navigator.pop(context, true);
                   }
                 : null,
             child: Text(

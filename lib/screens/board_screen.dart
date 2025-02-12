@@ -63,13 +63,12 @@ class _BoardScreenState extends State<BoardScreen>
     popularRefresh();
   }
 
-  void refresh() {
-    ApiService.fetchPosts().then((value) {
-      print("전체 질문들 $value");
-      setState(() {
-        posts = value;
-        filteredPosts = value;
-      });
+  Future<void> refresh() async {
+    final postData = await ApiService.fetchPosts();
+
+    setState(() {
+      posts = postData;
+      filteredPosts = postData;
     });
   }
 
@@ -97,16 +96,6 @@ class _BoardScreenState extends State<BoardScreen>
             .toList();
       });
     }
-  }
-
-  void navigateToPostWrite() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PostWrite(
-          onRefresh: refresh,
-        ),
-      ),
-    );
   }
 
   @override
@@ -199,16 +188,24 @@ class _BoardScreenState extends State<BoardScreen>
                     onRefresh: refresh,
                   ),
                 ),
+                QuestionList(posts: popularPosts, onRefresh: popularRefresh)
               ],
             ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // 글쓰기 버튼 클릭 시의 동작
-
-          navigateToPostWrite();
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PostWrite(),
+            ),
+          );
+          if (result == true) {
+            await Future.delayed(Duration(milliseconds: 200));
+            await refresh();
+          }
         },
         backgroundColor: Color(0xff748d6f),
         child: const Icon(Icons.edit, color: Colors.white),
