@@ -182,14 +182,6 @@ class _BoardScreenState extends State<BoardScreen>
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.6,
-                  child: QuestionList(
-                    posts: filteredPosts,
-                    onRefresh: refresh,
-                    selectedFilters: selectedFilters,
-                  ),
-                ),
                 QuestionList(
                   posts: popularPosts,
                   onRefresh: popularRefresh,
