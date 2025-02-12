@@ -110,7 +110,10 @@ class _UserEditState extends State<UserEdit> {
         backgroundColor: Colors.white,
         actions: [
           TextButton(
-            onPressed: _saveChanges,
+            onPressed: () {
+              _saveChanges();
+              navigateToMainPage();
+            },
             child: Text(
               "저장",
               style: TextStyle(color: Colors.black, fontSize: 16),

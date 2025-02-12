@@ -25,7 +25,17 @@ class _BoardScreenState extends State<BoardScreen>
     "캔": false,
   };
 
+  // 필터
   List<String> selectedFilters = [];
+
+  // 검색
+  List<Question> filteredPosts = [];
+
+  // 전체글
+  List<Question> posts = [];
+
+  // 인기글
+  List<Question> popularPosts = [];
 
   void _applyFilters(Map<String, bool> filters) {
     setState(() {
@@ -39,10 +49,6 @@ class _BoardScreenState extends State<BoardScreen>
     // 선택된 필터를 출력
     print("선택된 필터: $selectedFilters");
   }
-
-  List<Question> posts = [];
-
-  List<Question> popularPosts = [];
 
   @override
   void initState() {
@@ -58,6 +64,7 @@ class _BoardScreenState extends State<BoardScreen>
       print("전체 질문들 $value");
       setState(() {
         posts = value;
+        filteredPosts = value;
       });
     });
   }
@@ -69,6 +76,23 @@ class _BoardScreenState extends State<BoardScreen>
         popularPosts = value.toList();
       });
     });
+  }
+
+  // 검색
+  void _searchPosts(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        filteredPosts = posts;
+      });
+    } else {
+      setState(() {
+        filteredPosts = posts
+            .where((post) =>
+                post.title.toLowerCase().contains(query.toLowerCase()) ||
+                post.content.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
+    }
   }
 
   void navigateToPostWrite() {
@@ -122,6 +146,7 @@ class _BoardScreenState extends State<BoardScreen>
                     PostSearch(
                       onChanged: (value) {
                         print('검색어: $value');
+                        _searchPosts(value);
                       },
                     ),
                     Row(
@@ -158,7 +183,7 @@ class _BoardScreenState extends State<BoardScreen>
                       ],
                     ),
                     QuestionList(
-                      posts: posts,
+                      posts: filteredPosts,
                       onRefresh: refresh,
                     ),
                   ],
