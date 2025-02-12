@@ -235,6 +235,33 @@ class ApiService {
     }
   }
 
+  // 회원 정보 수정
+  Future<void> updateMemberInfo(String nickName, String address) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/member/modify');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+    final body = jsonEncode({'nickName': nickName, 'address': address});
+
+    final response = await http.put(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: body,
+    );
+
+    print('PUT Response status: ${response.statusCode}');
+    print('PUT Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      return ;
+    } else {
+      throw Exception('Failed to update MemberInfo');
+    }
+  }
+
   Future<http.Response> logout() async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/member/logout');
