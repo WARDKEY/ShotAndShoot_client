@@ -19,10 +19,14 @@ class _BoardScreenState extends State<BoardScreen>
   late TabController _tabController;
 
   Map<String, bool> _filters = {
-    "플라스틱": false,
-    "유리": false,
-    "박스": false,
+    "종이류": false,
+    "고철": false,
+    "유리병": false,
     "캔": false,
+    "플라스틱": false,
+    "스티로폼": false,
+    "비닐류": false,
+    "의류": false,
   };
 
   // 필터
@@ -141,7 +145,7 @@ class _BoardScreenState extends State<BoardScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                Column(
+                ListView(
                   children: [
                     PostSearch(
                       onChanged: (value) {
@@ -188,17 +192,13 @@ class _BoardScreenState extends State<BoardScreen>
                     ),
                   ],
                 ),
-
-                // 인기글 탭 콘텐츠
-                // ListView.builder(
-                //   itemCount: 30,
-                //   itemBuilder: (context, index) {
-                //     return ListTile(
-                //       title: Text("인기글 게시글 #$index"),
-                //     );
-                //   },
-                // ),
-                QuestionList(posts: popularPosts, onRefresh: popularRefresh)
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: QuestionList(
+                    posts: filteredPosts,
+                    onRefresh: refresh,
+                  ),
+                ),
               ],
             ),
           ),

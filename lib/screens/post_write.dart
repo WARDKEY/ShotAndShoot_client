@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../service/api_service.dart';
 
 class PostWrite extends StatefulWidget {
-  final VoidCallback onRefresh; // BoardScreen에서 전달한 콜백
+  final VoidCallback onRefresh;
 
   const PostWrite({super.key, required this.onRefresh});
 
@@ -13,24 +13,30 @@ class PostWrite extends StatefulWidget {
 
 class _PostWriteState extends State<PostWrite> {
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _categoryController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
 
+  final List<String> _categories = [
+    '종이류',
+    '고철',
+    '유리병',
+    '캔',
+    '플라스틱',
+    '스티로폼',
+    '비닐류',
+    '의류'
+  ];
+  String? _selectedCategory;
+
   bool isFinish() {
-    if (_titleController.text.isNotEmpty &&
-        _categoryController.text.isNotEmpty &&
-        _contentController.text.isNotEmpty) {
-      return true;
-    }
-    return false;
+    return _titleController.text.isNotEmpty &&
+        _selectedCategory != null &&
+        _contentController.text.isNotEmpty;
   }
 
   @override
   void initState() {
     super.initState();
-
     _titleController.addListener(_updateFinishState);
-    _categoryController.addListener(_updateFinishState);
     _contentController.addListener(_updateFinishState);
   }
 
@@ -41,7 +47,6 @@ class _PostWriteState extends State<PostWrite> {
   @override
   void dispose() {
     _titleController.dispose();
-    _categoryController.dispose();
     _contentController.dispose();
     super.dispose();
   }
@@ -52,34 +57,24 @@ class _PostWriteState extends State<PostWrite> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('글쓰기'),
+        title: const Text('글쓰기'),
         centerTitle: true,
         actions: [
           TextButton(
-            style: TextButton.styleFrom(
-                padding: const EdgeInsets.all(10),
-                backgroundColor: Colors.white,
-                textStyle: TextStyle(
-                  fontSize: 20,
-                )),
             onPressed: isFinish()
                 ? () {
-                    print(
-                        '제목 : ${_titleController.text} 카테고리 : ${_categoryController.text} 내용 ${_contentController.text}');
-                    // 질문 작성
                     ApiService.postQuestion(_titleController.text,
-                            _contentController.text, _categoryController.text)
+                            _contentController.text, _selectedCategory!)
                         .then((value) {
-                      widget.onRefresh;
+                      widget.onRefresh();
                     });
-                    // Navigator.pop(context);
                     Navigator.pop(context);
                   }
                 : null,
             child: Text(
               '완료',
               style: TextStyle(
-                color: isFinish() ? Color(0xff748d6f) : Colors.grey,
+                color: isFinish() ? const Color(0xff748d6f) : Colors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -90,12 +85,10 @@ class _PostWriteState extends State<PostWrite> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             TextField(
               controller: _titleController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: '제목',
                 labelStyle: TextStyle(
                   color: Colors.grey,
@@ -103,23 +96,28 @@ class _PostWriteState extends State<PostWrite> {
                 ),
               ),
             ),
-            SizedBox(
-              height: 15,
-            ),
-            TextField(
-              controller: _categoryController,
-              decoration: InputDecoration(
-                labelText: '카테고리',
-                labelStyle: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 20,
-                ),
+            const SizedBox(height: 30),
+            DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedCategory = newValue;
+                });
+              },
+              items: _categories.map((String category) {
+                return DropdownMenuItem<String>(
+                  value: category,
+                  child: Text(category),
+                );
+              }).toList(),
+              decoration: const InputDecoration(
+                labelText: '카테고리 선택',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 8),
               ),
             ),
-            SizedBox(
-              height: 40,
-            ),
-            Row(
+            const SizedBox(height: 40),
+            const Row(
               children: [
                 Text(
                   '내용',
@@ -127,12 +125,10 @@ class _PostWriteState extends State<PostWrite> {
                 ),
               ],
             ),
-            SizedBox(
-              height: 5,
-            ),
+            const SizedBox(height: 5),
             TextField(
               controller: _contentController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: '내용을 입력하세요.',
                 alignLabelWithHint: true,
                 enabledBorder: OutlineInputBorder(
