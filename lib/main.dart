@@ -9,7 +9,6 @@ import 'package:shotandshoot/screens/company_screen.dart';
 import 'package:shotandshoot/screens/login_screen.dart';
 import 'package:shotandshoot/screens/main_screen.dart';
 import 'package:shotandshoot/screens/mypage_screen.dart';
-import 'package:shotandshoot/screens/post_write.dart';
 import 'package:shotandshoot/screens/scan_screen.dart';
 import 'package:shotandshoot/provider/app_state_provider.dart';
 import 'package:shotandshoot/screens/signin_screen.dart';

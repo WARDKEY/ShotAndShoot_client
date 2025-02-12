@@ -50,6 +50,35 @@ class ApiService {
     }
   }
 
+  Future<Map<String, double>> getPoint(String location) async {
+    final url = Uri.parse(
+        "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${location}");
+    Map<String, String> headers = {
+      "X-NCP-APIGW-API-KEY-ID": dotenv.get('CLIENT_KEY'),
+      "X-NCP-APIGW-API-KEY": dotenv.get('CLIENT_SECRET'),
+    };
+
+    try {
+      final response = await http.get(
+        url,
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        String jsonData = response.body;
+
+        double x = double.parse(jsonDecode(jsonData)["addresses"][0]['x']);
+        double y = double.parse(jsonDecode(jsonData)["addresses"][0]['y']);
+
+        return {'lat': y, 'lot': x};
+      } else {
+        throw Exception(location);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
   Future<List<Company>> fetchCompanies(String location) async {
     String ip = dotenv.get('IP');
     final url = Uri.http(ip, '/api/v1/wasteCompany/', {'location': location});
@@ -78,6 +107,48 @@ class ApiService {
         return wasteCompanyData
             .map((companyJson) => Company.fromJson(companyJson))
             .toList();
+      } else {
+        throw Exception('Failed to load companies');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchCompany() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.http(ip, '/api/v1/wasteCompany/near');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (accessToken != null) {
+      headers['Authorization'] = 'Bearer $accessToken';
+    }
+
+    try {
+      final response = await http.get(
+        url,
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+
+        final data = jsonDecode(decodedBody);
+        final Company wasteCompanyData =
+            Company.fromJson(data['wasteCompanyDTO']);
+        print(wasteCompanyData);
+        final String myAddr = data['myAddress'];
+        final point = await getPoint(myAddr);
+
+        return {
+          'company': wasteCompanyData,
+          'myAdd': myAddr,
+          'point': point,
+        };
       } else {
         throw Exception('Failed to load companies');
       }
@@ -256,7 +327,7 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-      return ;
+      return;
     } else {
       throw Exception('Failed to update MemberInfo');
     }
