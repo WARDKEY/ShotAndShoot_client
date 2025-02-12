@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shotandshoot/models/question.dart';
-import 'package:shotandshoot/screens/board_screen.dart';
-import 'package:shotandshoot/screens/post_detail.dart';
 
 import '../service/api_service.dart';
 
