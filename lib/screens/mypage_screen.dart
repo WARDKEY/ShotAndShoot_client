@@ -254,6 +254,7 @@ class _MypageScreenState extends State<MypageScreen>
                                 _futureMyPosts = fetchMyPosts();
                               });
                             },
+                            selectedFilters: [],
                           );
                         },
                       ),
