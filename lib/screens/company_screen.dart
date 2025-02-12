@@ -18,6 +18,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
   final ApiService _apiService = ApiService();
   late Map<String, double> _currentPosition = {}; // 현재 위치
   late Future<List<Company>> _companies = Future.value([]); // 초기화
+  String _searchQuery = ""; // 검색어
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
     try {
       String location =
           await _apiService.getLocation(lat.toString(), lot.toString());
+      List<Company> companies = await fetchCompany(location, lat, lot);
       setState(() {
         _companies = fetchCompany(location, lat, lot);
       });
@@ -97,30 +99,88 @@ class _CompanyScreenState extends State<CompanyScreen> {
     }
   }
 
+  Future<List<Company>> _getFilteredCompanies() async {
+    final allCompanies = await _companies;
+    if (_searchQuery.isEmpty) {
+      return allCompanies; // Return the full list if no search query
+    }
+    return allCompanies
+        .where((company) => company.companyName
+            .toLowerCase()
+            .contains(_searchQuery.toLowerCase()))
+        .toList(); // Return filtered list
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Company>>(
-      future: _companies,
-      builder: (context, snapshot) {
-        // 로딩 중
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
+    return Scaffold(
+      body: Stack(
+        children: [
+          //----------------FutureBuilder로 콘텐츠 표시---------------
+          FutureBuilder<List<Company>>(
+            future: _getFilteredCompanies(),
+            builder: (context, snapshot) {
+              // 로딩 중
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                    child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xff748d6f))));
+              }
 
-        // 에러처리
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
+              // 에러 처리
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
 
-        // 데이터가 없는 경우 처리
-        if (snapshot.data == null || snapshot.data!.isEmpty) {
-          return Center(child: CircularProgressIndicator()); // 사용자 경험 개선
-        }
+              // 데이터가 없는 경우 처리
+              if (snapshot.data == null || snapshot.data!.isEmpty) {
+                return Center(
+                    child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xffac2323)),
+                ));
+              }
 
-        List<Company> companies = snapshot.data!;
+              List<Company> companies = snapshot.data!;
 
-        return buildNaverMap(companies);
-      },
+              return buildNaverMap(companies); // FutureBuilder의 내용
+            },
+          ),
+
+          //----------------상단 검색창---------------
+          Positioned(
+            top: 30.0,
+            left: 16.0,
+            right: 16.0,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(13, 10, 13, 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9), // 투명도 추가
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8.0,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                decoration: const InputDecoration(
+                  hintText: "대행업체명으로 검색",
+                  border: InputBorder.none,
+                  prefixIcon: Icon(Icons.search),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -220,37 +280,6 @@ class _CompanyScreenState extends State<CompanyScreen> {
                 ),
               );
             },
-          ),
-        ),
-
-        //----------------상단 검색창---------------
-        Positioned(
-          top: 30.0,
-          left: 16.0,
-          right: 16.0,
-          child: Container(
-            padding: EdgeInsets.fromLTRB(13, 10, 13, 4),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 8.0,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "대행업체명으로 검색",
-                border: InputBorder.none,
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: (value) {
-                print("검색어: $value");
-              },
-            ),
           ),
         ),
       ],
