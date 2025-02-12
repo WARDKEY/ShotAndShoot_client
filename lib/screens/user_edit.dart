@@ -19,11 +19,16 @@ class _UserEditState extends State<UserEdit> {
   final ApiService _apiService = ApiService();
 
   List<TextEditingController> _controllers = [];
-  List<String> _labels = ['이름', '이메일'];
+  final List<String> _labels = ['이름', '주소'];
 
   void navigateToMainPage() {
     Navigator.pop(context);
     Provider.of<AppState>(context, listen: false).onItemTapped(0);
+  }
+
+  // 회원 정보 수정
+  Future<void> updateMemberInfo(String nickName, String address) async {
+    await _apiService.updateMemberInfo(nickName, address);
   }
 
   // 카카오 로그아웃
@@ -42,7 +47,7 @@ class _UserEditState extends State<UserEdit> {
 
       if (response.statusCode == 200) {
         _tokenService.logOut();
-        print("로그아웃성공");
+        print("로그아웃 성공");
         navigateToMainPage();
       } else {
         print("로그아웃 실패 ${response.statusCode}");
@@ -76,7 +81,7 @@ class _UserEditState extends State<UserEdit> {
         List.generate(_labels.length, (index) => TextEditingController());
     // 초기 데이터 설정
     _controllers[0].text = "홍길동"; // 이름
-    _controllers[1].text = "hong@example.com"; // 이메일
+    _controllers[1].text = "경기도 OO시"; // 주소
   }
 
   @override
@@ -93,6 +98,7 @@ class _UserEditState extends State<UserEdit> {
       print('${_labels[i]}: ${_controllers[i].text}');
     }
     // 서버로 전송하거나 로컬 저장소에 저장하는 코드 추가
+    updateMemberInfo(_controllers[0].text, _controllers[1].text);
   }
 
   @override
