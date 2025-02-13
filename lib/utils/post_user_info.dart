@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kpostal/kpostal.dart';
 import 'package:shotandshoot/screens/signin_success_screen.dart';
 import 'package:shotandshoot/service/api_service.dart';
 
@@ -161,7 +162,33 @@ class _PostUserInfoState extends State<PostUserInfo> {
             ),
           ),
           SizedBox(
-            height: 50,
+            height: 10,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) {
+                      return KpostalView(
+                        callback: (Kpostal result) {
+                          // receiverZipController.text = result.postCode;
+                          _addressController.text = result.address;
+                        },
+                      );
+                    },
+                  ));
+                },
+                child: Text(
+                  "주소검색",
+                  style: TextStyle(color: Colors.blue, fontSize: 15),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 15,
           ),
           ElevatedButton(
             onPressed: () {

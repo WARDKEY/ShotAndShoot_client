@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:kpostal/kpostal.dart';
 import 'package:provider/provider.dart';
 import 'package:shotandshoot/service/api_service.dart';
 import 'package:shotandshoot/service/token_service.dart';
@@ -140,6 +141,29 @@ class _UserEditState extends State<UserEdit> {
                   ),
                 ),
               ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) {
+                        return KpostalView(
+                          callback: (Kpostal result) {
+                            // receiverZipController.text = result.postCode;
+                            _controllers[1].text = result.address;
+                          },
+                        );
+                      },
+                    ));
+                  },
+                  child: Text(
+                    "주소검색",
+                    style: TextStyle(color: Colors.blue, fontSize: 15),
+                  ),
+                ),
+              ],
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
