@@ -104,7 +104,7 @@ class _BoardScreenState extends State<BoardScreen>
       appBar: AppBar(
         backgroundColor: Colors.white,
         scrolledUnderElevation: 0,
-        title: Text("게시판"),
+        title: const Text("게시판"),
         centerTitle: true,
       ),
       body: Column(
@@ -115,9 +115,9 @@ class _BoardScreenState extends State<BoardScreen>
             elevation: 2, // 탭바 아래 그림자 효과
             child: TabBar(
               controller: _tabController,
-              labelColor: Color(0xff748d6f),
+              labelColor: const Color(0xff748d6f),
               unselectedLabelColor: Colors.grey,
-              indicatorColor: Color(0xff748d6f),
+              indicatorColor: const Color(0xff748d6f),
               // 강조선 색상
               indicatorWeight: 4.0,
               // 강조선 두께
@@ -129,64 +129,67 @@ class _BoardScreenState extends State<BoardScreen>
             ),
           ),
 
+          // 검색창과 필터: 고정
+          PostSearch(
+            onChanged: (value) {
+              print('검색어: $value');
+              _searchPosts(value);
+            },
+          ),
+          Row(
+            children: [
+              PostFilter(filters: _filters, onApply: _applyFilters),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal, // 가로로 스크롤
+                  child: Row(
+                    children: selectedFilters.map((filter) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        // 필터 간 간격 추가
+                        child: Chip(
+                          label: Text(filter),
+                          side: const BorderSide(
+                              width: 1.0, color: Color(0xff748d6f)),
+                          labelStyle: const TextStyle(color: Color(0xff748d6f)),
+                          backgroundColor: Colors.white,
+                          deleteIcon: const Icon(Icons.clear),
+                          onDeleted: () {
+                            setState(() {
+                              selectedFilters.remove(filter);
+                              _filters[filter] = false;
+                            });
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
           // 탭별 콘텐츠
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                ListView(
-                  children: [
-                    PostSearch(
-                      onChanged: (value) {
-                        print('검색어: $value');
-                        _searchPosts(value);
-                      },
-                    ),
-                    Row(
-                      children: [
-                        PostFilter(filters: _filters, onApply: _applyFilters),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal, // 가로로 스크롤
-                            child: Row(
-                              children: selectedFilters.map((filter) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  // 필터 간 간격 추가
-                                  child: Chip(
-                                    label: Text(filter),
-                                    side: BorderSide(
-                                        width: 1.0, color: Color(0xff748d6f)),
-                                    labelStyle:
-                                        TextStyle(color: Color(0xff748d6f)),
-                                    backgroundColor: Colors.white,
-                                    deleteIcon: Icon(Icons.clear),
-                                    onDeleted: () {
-                                      setState(() {
-                                        selectedFilters.remove(filter);
-                                        _filters[filter] = false;
-                                      });
-                                    },
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    QuestionList(
-                      posts: filteredPosts,
-                      onRefresh: refresh,
-                      selectedFilters: selectedFilters,
-                    ),
-                  ],
+                // 전체글
+                SingleChildScrollView(
+                  child: QuestionList(
+                    posts: filteredPosts,
+                    onRefresh: refresh,
+                    selectedFilters: selectedFilters,
+                  ),
                 ),
-                QuestionList(
-                  posts: popularPosts,
-                  onRefresh: popularRefresh,
-                  selectedFilters: selectedFilters,
-                )
+                // 인기글
+                SingleChildScrollView(
+                  child: QuestionList(
+                    posts: popularPosts,
+                    onRefresh: popularRefresh,
+                    selectedFilters: selectedFilters,
+                  ),
+                ),
               ],
             ),
           ),
@@ -201,11 +204,11 @@ class _BoardScreenState extends State<BoardScreen>
             ),
           );
           if (result == true) {
-            await Future.delayed(Duration(milliseconds: 200));
+            await Future.delayed(const Duration(milliseconds: 200));
             await refresh();
           }
         },
-        backgroundColor: Color(0xff748d6f),
+        backgroundColor: const Color(0xff748d6f),
         child: const Icon(Icons.edit, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

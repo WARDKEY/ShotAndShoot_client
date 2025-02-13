@@ -240,21 +240,22 @@ class _MypageScreenState extends State<MypageScreen>
                                 child: CircularProgressIndicator());
                           }
                           if (postsSnapshot.hasError) {
-                            return Center(
-                                child: Text('로그인 또는 회원가입을 해주세요.'));
+                            return Center(child: Text('로그인 또는 회원가입을 해주세요.'));
                           }
                           if (!postsSnapshot.hasData ||
                               postsSnapshot.data!.isEmpty) {
                             return const Center(child: Text('작성한 글이 없습니다.'));
                           }
-                          return QuestionList(
-                            posts: postsSnapshot.data!,
-                            onRefresh: () {
-                              setState(() {
-                                _futureMyPosts = fetchMyPosts();
-                              });
-                            },
-                            selectedFilters: [],
+                          return SingleChildScrollView(
+                            child: QuestionList(
+                              posts: postsSnapshot.data!,
+                              onRefresh: () {
+                                setState(() {
+                                  _futureMyPosts = fetchMyPosts();
+                                });
+                              },
+                              selectedFilters: [],
+                            ),
                           );
                         },
                       ),
@@ -262,19 +263,24 @@ class _MypageScreenState extends State<MypageScreen>
                       FutureBuilder<List<Comment>>(
                         future: _futureMyComments,
                         builder: (context, commentsSnapshot) {
-                          if (commentsSnapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
+                          if (commentsSnapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
                           }
                           if (commentsSnapshot.hasError) {
-                            return const Center(child: Text('로그인 또는 회원가입을 해주세요.'));
+                            return const Center(
+                                child: Text('로그인 또는 회원가입을 해주세요.'));
                           }
-                          if (!commentsSnapshot.hasData || commentsSnapshot.data!.isEmpty) {
+                          if (!commentsSnapshot.hasData ||
+                              commentsSnapshot.data!.isEmpty) {
                             return const Center(child: Text('작성한 댓글이 없습니다.'));
                           }
                           return ListView.builder(
                             itemCount: commentsSnapshot.data!.length,
                             itemBuilder: (context, index) {
-                              final comment = commentsSnapshot.data![index]; // Comment 객체 가져오기
+                              final comment = commentsSnapshot
+                                  .data![index]; // Comment 객체 가져오기
                               return ListTile(
                                 title: Text(comment.content), // Comment 내용 표시
                                 subtitle: Text(comment.createdAt.toString()),
