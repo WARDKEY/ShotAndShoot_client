@@ -22,24 +22,18 @@ class _UserEditState extends State<UserEdit> {
   List<TextEditingController> _controllers = [];
   final List<String> _labels = ['이름', '주소'];
 
+  Future<Map<String, dynamic>> fetchMemberInfo() async {
+    final response = await _apiService.getMemberInfo();
+    return response;
+  }
+
   void navigateToMainPage() {
     Navigator.pop(context);
     Provider.of<AppState>(context, listen: false).onItemTapped(0);
   }
 
-  // 회원 정보 수정
   Future<void> updateMemberInfo(String nickName, String address) async {
     await _apiService.updateMemberInfo(nickName, address);
-  }
-
-  // 카카오 로그아웃
-  Future<void> kakaoLogout() async {
-    await UserApi.instance.logout();
-  }
-
-  // 구글 로그아웃
-  Future<void> googleLogout() async {
-    await GoogleSignIn().signOut();
   }
 
   Future<void> logout() async {
@@ -77,17 +71,12 @@ class _UserEditState extends State<UserEdit> {
   @override
   void initState() {
     super.initState();
-    // 각 입력 필드에 대한 TextEditingController 초기화
     _controllers =
         List.generate(_labels.length, (index) => TextEditingController());
-    // 초기 데이터 설정
-    _controllers[0].text = "홍길동"; // 이름
-    _controllers[1].text = "경기도 OO시"; // 주소
   }
 
   @override
   void dispose() {
-    // 모든 컨트롤러 정리
     for (var controller in _controllers) {
       controller.dispose();
     }
@@ -95,10 +84,6 @@ class _UserEditState extends State<UserEdit> {
   }
 
   void _saveChanges() {
-    for (int i = 0; i < _controllers.length; i++) {
-      print('${_labels[i]}: ${_controllers[i].text}');
-    }
-    // 서버로 전송하거나 로컬 저장소에 저장하는 코드 추가
     updateMemberInfo(_controllers[0].text, _controllers[1].text);
   }
 
@@ -106,7 +91,7 @@ class _UserEditState extends State<UserEdit> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('회원 정보 수정'),
+        title: const Text('회원 정보 수정'),
         centerTitle: true,
         backgroundColor: Colors.white,
         actions: [
@@ -115,86 +100,101 @@ class _UserEditState extends State<UserEdit> {
               _saveChanges();
               navigateToMainPage();
             },
-            child: Text(
+            child: const Text(
               "저장",
               style: TextStyle(color: Colors.black, fontSize: 16),
             ),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (int i = 0; i < _labels.length; i++)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 25), // 각 필드 간 간격
-                child: TextField(
-                  controller: _controllers[i],
-                  decoration: InputDecoration(
-                    labelText: _labels[i],
-                    // 둥근 테두리 설정
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12), // 테두리 둥글게
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: fetchMemberInfo(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('오류 발생: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            final data = snapshot.data!;
+            _controllers[0].text = data["nickName"] ?? '';
+            _controllers[1].text = data["address"] ?? '';
+
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (int i = 0; i < _labels.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 25),
+                      child: TextField(
+                        controller: _controllers[i],
+                        decoration: InputDecoration(
+                          labelText: _labels[i],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
                     ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) {
+                              return KpostalView(
+                                callback: (Kpostal result) {
+                                  _controllers[1].text = result.address;
+                                },
+                              );
+                            },
+                          ));
+                        },
+                        child: const Text(
+                          "주소검색",
+                          style: TextStyle(color: Colors.blue, fontSize: 15),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () async {
+                          await logout();
+                        },
+                        child: const Text(
+                          "로그아웃",
+                          style: TextStyle(color: Colors.grey, fontSize: 15),
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(7, 0, 7, 0),
+                        height: 15,
+                        width: 1,
+                        color: Colors.grey,
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          await deleteAccount();
+                        },
+                        child: const Text(
+                          "회원탈퇴",
+                          style: TextStyle(color: Colors.grey, fontSize: 15),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) {
-                        return KpostalView(
-                          callback: (Kpostal result) {
-                            // receiverZipController.text = result.postCode;
-                            _controllers[1].text = result.address;
-                          },
-                        );
-                      },
-                    ));
-                  },
-                  child: Text(
-                    "주소검색",
-                    style: TextStyle(color: Colors.blue, fontSize: 15),
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: () async {
-                    await logout();
-                  },
-                  child: Text(
-                    "로그아웃",
-                    style: TextStyle(color: Colors.grey, fontSize: 15),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(7, 0, 7, 0),
-                  height: 15, // 세로 높이 설정
-                  width: 1, // 선의 두께
-                  color: Colors.grey, // 선 색상
-                ),
-                TextButton(
-                  onPressed: () async {
-                    await deleteAccount();
-                  },
-                  child: Text(
-                    "회원탈퇴",
-                    style: TextStyle(color: Colors.grey, fontSize: 15),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+            );
+          } else {
+            return const Center(child: Text('회원 정보를 불러올 수 없습니다.'));
+          }
+        },
       ),
     );
   }
