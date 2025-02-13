@@ -696,4 +696,29 @@ class ApiService {
       throw Exception('Error: $e');
     }
   }
+
+  // 회원의 이름과 주소 조회
+  Future<Map<String, dynamic>> getMemberInfo() async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/member/info');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    print('GET Response status: ${response.statusCode}');
+    print('GET Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+      return jsonResponse;
+    } else {
+      throw Exception('Failed to get memberInfo');
+    }
+  }
 }
