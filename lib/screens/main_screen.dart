@@ -19,6 +19,11 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final ApiService _apiService = ApiService();
+  final List<String> banners = [
+    "images/banner3.png",
+    "images/banner1.png",
+    "images/banner2.png",
+  ];
   final List<Map<String, dynamic>> gridItems = [
     {'image': 'images/paper.png', 'name': '종이류'},
     {'image': 'images/metal.png', 'name': '고철'},
@@ -104,11 +109,15 @@ class _MainScreenState extends State<MainScreen> {
                   itemBuilder: (BuildContext context, int index) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network("https://picsum.photos/600/400"),
+                      child: Image.asset(
+                        banners[index],
+                        height: 400,
+                        width: 600,
+                      ),
                     );
                   },
                   //autoplay: true,
-                  itemCount: 3,
+                  itemCount: banners.length,
                   pagination: SwiperPagination(
                     alignment: Alignment.bottomCenter,
                     builder: DotSwiperPaginationBuilder(
