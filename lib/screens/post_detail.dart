@@ -182,12 +182,15 @@ class _PostDetailState extends State<PostDetail> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.blue[100],
+                  color: Colors.blue,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   question.category,
-                  style: const TextStyle(color: Colors.blue, fontSize: 12),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,),
                 ),
               ),
               const SizedBox(width: 8),
@@ -195,7 +198,7 @@ class _PostDetailState extends State<PostDetail> {
                 child: Text(
                   question.title,
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                      fontSize: 19, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -209,8 +212,8 @@ class _PostDetailState extends State<PostDetail> {
                 style: const TextStyle(color: Colors.grey),
               ),
               const SizedBox(width: 10),
-              const Text(
-                '작성: ',
+              Text(
+                _question!.createAt.toString(),
                 style: TextStyle(color: Colors.grey),
               ),
               const Spacer(),
@@ -231,7 +234,7 @@ class _PostDetailState extends State<PostDetail> {
           // 질문 내용
           Text(
             question.content,
-            style: const TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: 17),
           ),
           const SizedBox(height: 20),
           // AI 코멘트 영역
@@ -251,6 +254,7 @@ class _PostDetailState extends State<PostDetail> {
                   style: TextStyle(
                     color: const Color(0xff748d6f),
                     fontWeight: FontWeight.w400,
+                    fontSize: 18,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -261,6 +265,7 @@ class _PostDetailState extends State<PostDetail> {
                       _aiComments ?? '로딩 중...',
                       style: const TextStyle(
                         fontWeight: FontWeight.w400,
+                        fontSize: 17,
                       ),
                     ),
                   ),
@@ -284,7 +289,7 @@ class _PostDetailState extends State<PostDetail> {
                 Text(
                   '댓글 ${_comments.length}개',
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 Expanded(
@@ -343,6 +348,7 @@ class _PostDetailState extends State<PostDetail> {
                   '등록',
                   style: TextStyle(
                     color: Color(0xff748d6f),
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),

@@ -20,7 +20,7 @@ class _UserEditState extends State<UserEdit> {
   final ApiService _apiService = ApiService();
 
   List<TextEditingController> _controllers = [];
-  final List<String> _labels = ['이름', '주소'];
+  final List<String> _labels = ['이름', '주소', '상세주소'];
 
   Future<Map<String, dynamic>> fetchMemberInfo() async {
     final response = await _apiService.getMemberInfo();
@@ -124,41 +124,68 @@ class _UserEditState extends State<UserEdit> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  for (int i = 0; i < _labels.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 25),
-                      child: TextField(
-                        controller: _controllers[i],
-                        decoration: InputDecoration(
-                          labelText: _labels[i],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 25),
+                    child: TextField(
+                      controller: _controllers[0],
+                      decoration: InputDecoration(
+                        labelText: _labels[0],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) {
-                              return KpostalView(
-                                callback: (Kpostal result) {
-                                  _controllers[1].text = result.address;
-                                },
-                              );
-                            },
-                          ));
-                        },
-                        child: const Text(
-                          "주소검색",
-                          style: TextStyle(color: Colors.blue, fontSize: 15),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 25),
+                    child: TextField(
+                      controller: _controllers[1],
+                      readOnly: true,
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) {
+                            return KpostalView(
+                              callback: (Kpostal result) {
+                                // receiverZipController.text = result.postCode;
+                                _controllers[1].text = result.address;
+                              },
+                            );
+                          },
+                        ));
+                      },
+                      decoration: InputDecoration(
+                        labelText: _labels[1],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    ],
+                    ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 25),
+                    child: TextField(
+                      controller: _controllers[2],
+                      decoration: InputDecoration(
+                        labelText: "상세주소",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // for (int i = 0; i < _labels.length; i++)
+                  //   Padding(
+                  //     padding: const EdgeInsets.only(bottom: 25),
+                  //     child: TextField(
+                  //       controller: _controllers[i],
+                  //       decoration: InputDecoration(
+                  //         labelText: _labels[i],
+                  //         border: OutlineInputBorder(
+                  //           borderRadius: BorderRadius.circular(12),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

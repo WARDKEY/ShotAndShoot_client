@@ -51,49 +51,75 @@ class QuestionList extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 게시글 제목
-                Text(
-                  "[${post.category!}] ${post.title!}",
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                // 게시글 내용
-                Text(
-                  post.content,
-                  style: const TextStyle(fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-                const SizedBox(height: 5),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Text(post.member!,
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey)),
-                        const SizedBox(width: 10),
-                        Text(post.createAt!,
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey)),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        post.category,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,),
+                      ),
                     ),
-                    Row(
-                      children: [
-                        if (post.view! > 0)
-                          Text('🕶️ ${post.view}',
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey)),
-                        if (post.comments > 0) ...[
-                          const SizedBox(width: 10),
-                          Text('🗨️ ${post.comments}',
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey)),
-                        ]
-                      ],
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        post.title,
+                        style: const TextStyle(
+                            fontSize: 19, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
+                ),
+                // 게시글 내용
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(2, 2, 5, 3),
+                  child: Text(
+                    post.content,
+                    style: const TextStyle(fontSize: 17),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(2, 0, 5, 3),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Text(post.member!,
+                              style: const TextStyle(
+                                  fontSize: 13, color: Colors.grey)),
+                          const SizedBox(width: 10),
+                          Text(post.createAt!,
+                              style: const TextStyle(
+                                  fontSize: 13, color: Colors.grey)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          if (post.view! > 0)
+                            Text('🕶️ ${post.view}',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey)),
+                          if (post.comments > 0) ...[
+                            const SizedBox(width: 10),
+                            Text('🗨️ ${post.comments}',
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey)),
+                          ]
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 if (!isLastPost)
                   const Divider(
