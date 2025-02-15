@@ -5,6 +5,7 @@ import 'package:shotandshoot/service/api_service.dart';
 
 class PostUserInfo extends StatefulWidget {
   final String id;
+
   const PostUserInfo({super.key, required this.id});
 
   @override
@@ -18,6 +19,8 @@ class _PostUserInfoState extends State<PostUserInfo> {
   final TextEditingController _nickNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _detailAddressController =
+      TextEditingController();
 
   // 회원가입인지 내정보 수정인지에 따라 상태 관리 해야됨
 
@@ -37,6 +40,7 @@ class _PostUserInfoState extends State<PostUserInfo> {
     _nickNameController.dispose();
     _phoneNumberController.dispose();
     _addressController.dispose();
+    _detailAddressController.dispose();
     super.dispose();
   }
 
@@ -62,7 +66,7 @@ class _PostUserInfoState extends State<PostUserInfo> {
                 "닉네임",
                 style: TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
@@ -103,7 +107,7 @@ class _PostUserInfoState extends State<PostUserInfo> {
                 "전화번호",
                 style: TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -137,7 +141,7 @@ class _PostUserInfoState extends State<PostUserInfo> {
                 "주소",
                 style: TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
@@ -147,6 +151,19 @@ class _PostUserInfoState extends State<PostUserInfo> {
           ),
           TextField(
             controller: _addressController,
+            readOnly: true,
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) {
+                  return KpostalView(
+                    callback: (Kpostal result) {
+                      // receiverZipController.text = result.postCode;
+                      _addressController.text = result.address;
+                    },
+                  );
+                },
+              ));
+            },
             decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -162,39 +179,50 @@ class _PostUserInfoState extends State<PostUserInfo> {
             ),
           ),
           SizedBox(
-            height: 10,
+            height: 30,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) {
-                      return KpostalView(
-                        callback: (Kpostal result) {
-                          // receiverZipController.text = result.postCode;
-                          _addressController.text = result.address;
-                        },
-                      );
-                    },
-                  ));
-                },
-                child: Text(
-                  "주소검색",
-                  style: TextStyle(color: Colors.blue, fontSize: 15),
+              Text(
+                "상세주소",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
           SizedBox(
-            height: 15,
+            height: 10,
+          ),
+          TextField(
+            controller: _detailAddressController,
+            decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 1.0,
+                ),
+              ),
+              labelText: '상세주소',
+              labelStyle: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 55,
           ),
           ElevatedButton(
             onPressed: () {
               // 닉네임, 전화번호, 주소 들어가기전 클릭 비활성화
-              ApiService.postUserInfo(widget.id, _nickNameController.text,
-                  _phoneNumberController.text, _addressController.text);
+              ApiService.postUserInfo(
+                  widget.id,
+                  _nickNameController.text,
+                  _phoneNumberController.text,
+                  _addressController.text + _detailAddressController.text);
               navigateToSignInLoginPage();
               print(
                   '닉네임 : ${_nickNameController.text} 전화번호 : ${_phoneNumberController.text} 주소 : ${_addressController.text}');
@@ -212,7 +240,7 @@ class _PostUserInfoState extends State<PostUserInfo> {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shotandshoot/main.dart';
+import 'package:shotandshoot/screens/login_screen.dart';
+
+import '../service/auth_service.dart';
 
 class SigninLoginScreen extends StatefulWidget {
   const SigninLoginScreen({super.key});
@@ -9,16 +12,18 @@ class SigninLoginScreen extends StatefulWidget {
 }
 
 class _SigninLoginScreenState extends State<SigninLoginScreen> {
-  void navigateMainPage() {
+  void navigateLoginPage() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => MyApp(),
+        builder: (context) => LoginScreen(),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    AuthService authService = AuthService(context);
+
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -66,7 +71,7 @@ class _SigninLoginScreenState extends State<SigninLoginScreen> {
           ElevatedButton(
             onPressed: () {
               // 로그인 시 처리
-              navigateMainPage();
+              navigateLoginPage();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xff748d6f),
