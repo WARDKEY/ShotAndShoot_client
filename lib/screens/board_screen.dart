@@ -204,7 +204,7 @@ class _BoardScreenState extends State<BoardScreen>
             ),
           );
           if (result == true) {
-            await Future.delayed(const Duration(milliseconds: 200));
+            await Future.delayed(const Duration(milliseconds: 500));
             await refresh();
           }
         },

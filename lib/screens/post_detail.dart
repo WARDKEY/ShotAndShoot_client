@@ -21,10 +21,13 @@ class PostDetail extends StatefulWidget {
 class _PostDetailState extends State<PostDetail> {
   final TextEditingController _commentController = TextEditingController();
   List<Comment> _comments = <Comment>[];
-  String? _aiComments;
   Question? _question;
   final TokenService _tokenService = TokenService();
   bool _isLoggedIn = false;
+
+  late Timer _timer;
+  bool _isAiCommentReady = false;
+  String _aiComment = "AI 댓글을 기다리는 중...";
 
   // 현재 로그인한 사용자의 ID (실제 로그인 로직에 따라 할당)
   String _currentUserId = "";
@@ -54,12 +57,8 @@ class _PostDetailState extends State<PostDetail> {
       });
     });
 
-    // AI 댓글 데이터 불러오기
-    ApiService.fetchAiComment(widget.questionId).then((value) {
-      print("ai 댓글 내용 : ${value.content}");
-      setState(() {
-        _aiComments = value.content;
-      });
+    _timer = Timer.periodic(Duration(seconds: 7), (timer) {
+      _checkAiCommentStatus();
     });
 
     // 댓글 목록 불러오기
@@ -74,6 +73,22 @@ class _PostDetailState extends State<PostDetail> {
     }).catchError((error) {
       print("질문 불러오기 에러: $error");
     });
+  }
+
+  Future<void> _checkAiCommentStatus() async {
+    try {
+      AiComments aiComment = await ApiService.fetchAiComment(widget.questionId);
+      setState(() {
+        _isAiCommentReady = true;
+        _aiComment = aiComment.content;
+      });
+      _timer.cancel(); // AI 댓글이 생성되면 타이머 종료
+    } catch (e) {
+      setState(() {
+        _isAiCommentReady = false;
+        _aiComment = "AI 댓글 생성 중...";
+      });
+    }
   }
 
   // 댓글 목록과 각 댓글의 작성자 정보(작성자 userId)를 불러오는 메서드
@@ -123,6 +138,7 @@ class _PostDetailState extends State<PostDetail> {
   void dispose() {
     _commentController.dispose();
     super.dispose();
+    _timer.cancel();
   }
 
   @override
@@ -188,9 +204,10 @@ class _PostDetailState extends State<PostDetail> {
                 child: Text(
                   question.category,
                   style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,),
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -261,12 +278,19 @@ class _PostDetailState extends State<PostDetail> {
                 SizedBox(
                   height: 150,
                   child: SingleChildScrollView(
-                    child: Text(
-                      _aiComments ?? '로딩 중...',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 17,
-                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _aiComment,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        if (!_isAiCommentReady)
+                          CircularProgressIndicator(), // AI 댓글이 준비되지 않았으면 로딩 표시
+                      ],
                     ),
                   ),
                 ),
