@@ -14,13 +14,13 @@ class _PostWriteState extends State<PostWrite> {
   final TextEditingController _contentController = TextEditingController();
 
   final List<String> _categories = [
-    '종이류',
+    '종이',
     '고철',
-    '유리병',
+    '유리',
     '캔',
     '플라스틱',
     '스티로폼',
-    '비닐류',
+    '비닐',
     '의류'
   ];
   String? _selectedCategory;
@@ -72,6 +72,7 @@ class _PostWriteState extends State<PostWrite> {
               style: TextStyle(
                 color: isFinish() ? const Color(0xff748d6f) : Colors.grey,
                 fontWeight: FontWeight.w500,
+                fontSize: 18
               ),
             ),
           ),
@@ -111,13 +112,15 @@ class _PostWriteState extends State<PostWrite> {
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 8),
               ),
+              dropdownColor: Colors.white,
             ),
             const SizedBox(height: 40),
             const Row(
               children: [
                 Text(
                   '내용',
-                  style: TextStyle(fontSize: 23),
+                  style: TextStyle(fontSize: 20,
+                  fontWeight: FontWeight.w500),
                 ),
               ],
             ),

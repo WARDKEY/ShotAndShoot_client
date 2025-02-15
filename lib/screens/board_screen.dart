@@ -19,13 +19,13 @@ class _BoardScreenState extends State<BoardScreen>
   late TabController _tabController;
 
   Map<String, bool> _filters = {
-    "종이류": false,
+    "종이": false,
     "고철": false,
-    "유리병": false,
+    "유리": false,
     "캔": false,
     "플라스틱": false,
     "스티로폼": false,
-    "비닐류": false,
+    "비닐": false,
     "의류": false,
   };
 
