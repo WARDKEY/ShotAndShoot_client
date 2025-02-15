@@ -42,18 +42,21 @@ class CommentItem extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      memberName,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      time,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(2, 0, 12, 0),
+                  child: Row(
+                    children: [
+                      Text(
+                        memberName,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        time,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
                 ),
                 // 현재 로그인한 사용자와 API로 받아온 댓글 작성자가 일치할 때만 삭제 버튼 표시
                 if (isOwner)
@@ -71,8 +74,13 @@ class CommentItem extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 12, 0),
-              child: Text(content),
+              padding: const EdgeInsets.fromLTRB(2, 0, 12, 0),
+              child: Text(
+                content,
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
             ),
             const SizedBox(height: 12),
           ],
