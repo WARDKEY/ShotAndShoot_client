@@ -27,6 +27,7 @@ class _BoardScreenState extends State<BoardScreen>
     "스티로폼": false,
     "비닐": false,
     "의류": false,
+    "기타": false,
   };
 
   // 필터
