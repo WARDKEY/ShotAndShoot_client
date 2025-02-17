@@ -1,10 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shotandshoot/models/comment.dart';
 import 'package:shotandshoot/models/question.dart';
 import 'package:shotandshoot/service/api_service.dart';
 import 'package:shotandshoot/service/token_service.dart';
 
+import '../models/AiComments.dart';
 import '../utils/comment_item.dart';
+
+final Map<String, Color> _categoryColors = {
+  '종이': Colors.brown,
+  '고철': Colors.grey,
+  '유리': Colors.blue,
+  '캔': Colors.green,
+  '플라스틱': Colors.orange,
+  '스티로폼': Colors.purple,
+  '비닐': Colors.pink,
+  '의류': Colors.red,
+  '기타': Colors.black,
+};
+
+Color _getCategoryColor(String category) {
+  return _categoryColors[category] ?? Colors.grey;
+}
 
 class PostDetail extends StatefulWidget {
   final int questionId;
@@ -198,7 +217,7 @@ class _PostDetailState extends State<PostDetail> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: _getCategoryColor(question.category),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

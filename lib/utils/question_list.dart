@@ -1,26 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:shotandshoot/models/question.dart';
 import '../screens/post_detail.dart';
+// 카테고리별 색상 설정
+final Map<String, Color> _categoryColors = {
+  '종이': Colors.brown,
+  '고철': Colors.grey,
+  '유리': Colors.blue,
+  '캔': Colors.green,
+  '플라스틱': Colors.orange,
+  '스티로폼': Colors.purple,
+  '비닐': Colors.pink,
+  '의류': Colors.red,
+  '기타': Colors.black,
+};
 
 class QuestionList extends StatelessWidget {
   final List<Question> posts;
-  final VoidCallback onRefresh; // BoardScreen에서 전달한 콜백
-  final List<String> selectedFilters; // 선택된 필터 목록 추가
+  final VoidCallback onRefresh;
+  final List<String> selectedFilters;
 
   const QuestionList({
     super.key,
     required this.posts,
     required this.onRefresh,
-    required this.selectedFilters, // 선택된 필터 목록 초기화
+    required this.selectedFilters,
   });
 
-  // 필터링된 게시글 목록을 반환하는 함수
   List<Question> get _filteredPosts {
     if (selectedFilters.isEmpty) {
-      return posts; // 필터가 선택되지 않았으면 모든 게시글 반환
+      return posts;
     } else {
       return posts.where((post) {
-        // 각 게시글의 카테고리가 선택된 필터에 포함되는지 확인
         return selectedFilters.contains(post.category);
       }).toList();
     }
@@ -28,17 +38,19 @@ class QuestionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 필터링된 게시글 목록 사용
     List<Question> displayPosts = _filteredPosts;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(15, 5, 15, 7),
       child: Column(
-        children: displayPosts.map((post) { // _filteredPosts로 변경
-          bool isLastPost = displayPosts.indexOf(post) == displayPosts.length - 1; // displayPosts로 변경
+        children: displayPosts.map((post) {
+          bool isLastPost =
+              displayPosts.indexOf(post) == displayPosts.length - 1;
+          String category = post.category;
+          Color categoryColor = _categoryColors[category] ?? Colors.black;
+
           return GestureDetector(
             onTap: () {
-              // 게시글 클릭 시 상세 화면으로 이동 후, 복귀하면 onRefresh 호출
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -53,30 +65,41 @@ class QuestionList extends StatelessWidget {
               children: [
                 Row(
                   children: [
+                    // 카테고리 박스
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
+                      margin: const EdgeInsets.only(bottom: 5, right: 10),
                       decoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: categoryColor,
+                        border: Border.all(color: categoryColor),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        post.category,
-                        style: const TextStyle(
+                        category,
+                        style: TextStyle(
                           color: Colors.white,
+                          fontWeight: FontWeight.w500,
                           fontSize: 13,
-                          fontWeight: FontWeight.w500,),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    // 게시글 제목
                     Expanded(
                       child: Text(
                         post.title,
                         style: const TextStyle(
-                            fontSize: 19, fontWeight: FontWeight.bold),
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
+
                 // 게시글 내용
                 Padding(
                   padding: const EdgeInsets.fromLTRB(2, 2, 5, 3),
@@ -88,6 +111,7 @@ class QuestionList extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 5),
+
                 Padding(
                   padding: const EdgeInsets.fromLTRB(2, 0, 5, 3),
                   child: Row(
@@ -129,7 +153,7 @@ class QuestionList extends StatelessWidget {
               ],
             ),
           );
-        }).toList(), // displayPosts.map의 toList() 호출
+        }).toList(),
       ),
     );
   }

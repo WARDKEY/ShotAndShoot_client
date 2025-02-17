@@ -21,7 +21,8 @@ class _PostWriteState extends State<PostWrite> {
     '플라스틱',
     '스티로폼',
     '비닐',
-    '의류'
+    '의류',
+    '기타',
   ];
   String? _selectedCategory;
 
