@@ -272,8 +272,8 @@ class ApiService {
   }
 
 //  회원가입 정보 전달
-  static Future<MemberInfo> postUserInfo(
-      String id, String name, String phoneNumber, String address) async {
+  static Future<MemberInfo> postUserInfo(String id, String name,
+      String phoneNumber, String address, String detailAddress) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/member/register');
 
@@ -288,6 +288,7 @@ class ApiService {
           'name': name,
           'phoneNumber': phoneNumber,
           'address': address,
+          'detailAddress': detailAddress,
         }),
       );
 
@@ -307,11 +308,16 @@ class ApiService {
   }
 
   // 회원 정보 수정
-  Future<void> updateMemberInfo(String nickName, String address) async {
+  Future<void> updateMemberInfo(
+      String nickName, String address, String detailAddress) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/member/modify');
     String? accessToken = await _secureStorage.read(key: 'accessToken');
-    final body = jsonEncode({'nickName': nickName, 'address': address});
+    final body = jsonEncode({
+      'nickName': nickName,
+      'address': address,
+      'detailAddress': detailAddress,
+    });
 
     final response = await http.put(
       url,
@@ -715,7 +721,8 @@ class ApiService {
     print('GET Response body: ${response.body}');
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse = jsonDecode(utf8.decode(response.bodyBytes));
+      final Map<String, dynamic> jsonResponse =
+          jsonDecode(utf8.decode(response.bodyBytes));
       return jsonResponse;
     } else {
       throw Exception('Failed to get memberInfo');
