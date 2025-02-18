@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shotandshoot/models/question.dart';
 import '../screens/post_detail.dart';
 // 카테고리별 색상 설정
@@ -33,6 +34,20 @@ class QuestionList extends StatelessWidget {
       return posts.where((post) {
         return selectedFilters.contains(post.category);
       }).toList();
+    }
+  }
+
+  // 시간 형식 지정
+  String _formatDate(String dateString) {
+    DateTime dateTime = DateFormat("yyyy-MM-dd HH:mm").parse(dateString);
+    DateTime now = DateTime.now();
+
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day) {
+      return DateFormat("HH:mm").format(dateTime);  // 오늘인 경우 시간만
+    } else {
+      return DateFormat("yyyy-MM-dd").format(dateTime);  // 오늘이 아닌 경우 날짜 전체
     }
   }
 
@@ -122,8 +137,7 @@ class QuestionList extends StatelessWidget {
                           Text(post.member!,
                               style: const TextStyle(
                                   fontSize: 13, color: Colors.grey)),
-                          const SizedBox(width: 10),
-                          Text(post.createAt!,
+                          Text(_formatDate(post.createAt!),
                               style: const TextStyle(
                                   fontSize: 13, color: Colors.grey)),
                         ],
