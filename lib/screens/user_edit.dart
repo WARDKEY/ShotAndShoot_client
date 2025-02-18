@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:kpostal/kpostal.dart';
 import 'package:provider/provider.dart';
 import 'package:shotandshoot/service/api_service.dart';
@@ -20,10 +18,11 @@ class _UserEditState extends State<UserEdit> {
   final ApiService _apiService = ApiService();
 
   List<TextEditingController> _controllers = [];
-  final List<String> _labels = ['이름', '주소', '상세주소'];
+  final List<String> _labels = ['이름', '주소', '상세 주소'];
 
   Future<Map<String, dynamic>> fetchMemberInfo() async {
     final response = await _apiService.getMemberInfo();
+    print('불러온 결과 =========== $response');
     return response;
   }
 
@@ -32,8 +31,9 @@ class _UserEditState extends State<UserEdit> {
     Provider.of<AppState>(context, listen: false).onItemTapped(0);
   }
 
-  Future<void> updateMemberInfo(String nickName, String address) async {
-    await _apiService.updateMemberInfo(nickName, address);
+  Future<void> updateMemberInfo(
+      String nickName, String address, String detailAddress) async {
+    await _apiService.updateMemberInfo(nickName, address, detailAddress);
   }
 
   Future<void> logout() async {
@@ -84,7 +84,9 @@ class _UserEditState extends State<UserEdit> {
   }
 
   void _saveChanges() {
-    updateMemberInfo(_controllers[0].text, _controllers[1].text);
+    print('--------------- 상세 주소 왜 안 나오냐 ${_controllers[2]}');
+    updateMemberInfo(
+        _controllers[0].text, _controllers[1].text, _controllers[2].text);
   }
 
   @override
@@ -118,6 +120,7 @@ class _UserEditState extends State<UserEdit> {
             final data = snapshot.data!;
             _controllers[0].text = data["nickName"] ?? '';
             _controllers[1].text = data["address"] ?? '';
+            _controllers[2].text = data["detailAddress"] ?? '';
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -148,6 +151,10 @@ class _UserEditState extends State<UserEdit> {
                               callback: (Kpostal result) {
                                 // receiverZipController.text = result.postCode;
                                 _controllers[1].text = result.address;
+                                print(
+                                    '============ Address: ${_controllers[1].text}');
+                                print(
+                                    '============ Detail Address: ${_controllers[2].text}');
                               },
                             );
                           },
@@ -166,7 +173,7 @@ class _UserEditState extends State<UserEdit> {
                     child: TextField(
                       controller: _controllers[2],
                       decoration: InputDecoration(
-                        labelText: "상세주소",
+                        labelText: "상세 주소",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

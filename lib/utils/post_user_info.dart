@@ -185,7 +185,7 @@ class _PostUserInfoState extends State<PostUserInfo> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "상세주소",
+                "상세 주소",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
@@ -219,13 +219,15 @@ class _PostUserInfoState extends State<PostUserInfo> {
             onPressed: () {
               // 닉네임, 전화번호, 주소 들어가기전 클릭 비활성화
               ApiService.postUserInfo(
-                  widget.id,
-                  _nickNameController.text,
-                  _phoneNumberController.text,
-                  _addressController.text + _detailAddressController.text);
+                widget.id,
+                _nickNameController.text,
+                _phoneNumberController.text,
+                _addressController.text,
+                _detailAddressController.text,
+              );
               navigateToSignInLoginPage();
               print(
-                  '닉네임 : ${_nickNameController.text} 전화번호 : ${_phoneNumberController.text} 주소 : ${_addressController.text}');
+                  '닉네임 : ${_nickNameController.text} 전화번호 : ${_phoneNumberController.text} 주소 : ${_addressController.text} 상세 주소 : ${_detailAddressController.text}');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xff748d6f),
