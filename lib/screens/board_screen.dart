@@ -42,6 +42,10 @@ class _BoardScreenState extends State<BoardScreen>
   // 인기글
   List<Question> popularPosts = [];
 
+  // 인기글 검색 및 필터 적용 리스트 추가
+  List<Question> filteredPopularPosts = [];
+
+  // 필터 적용
   void _applyFilters(Map<String, bool> filters) {
     setState(() {
       selectedFilters = filters.entries
@@ -51,8 +55,23 @@ class _BoardScreenState extends State<BoardScreen>
       _filters = filters;
     });
 
-    // 선택된 필터를 출력
-    print("선택된 필터: $selectedFilters");
+    // 필터가 선택되지 않은 경우 전체 리스트를 그대로 유지
+    if (selectedFilters.isEmpty) {
+      filteredPosts = posts;
+      filteredPopularPosts = popularPosts;
+    } else {
+      // 전체글 필터 적용
+      filteredPosts = posts.where((post) {
+        return selectedFilters.any((filter) =>
+            post.title.contains(filter) || post.content.contains(filter));
+      }).toList();
+
+      // 인기글 필터 적용
+      filteredPopularPosts = popularPosts.where((post) {
+        return selectedFilters.any((filter) =>
+            post.title.contains(filter) || post.content.contains(filter));
+      }).toList();
+    }
   }
 
   @override
@@ -73,11 +92,12 @@ class _BoardScreenState extends State<BoardScreen>
     });
   }
 
+  // 인기글 갱신
   void popularRefresh() {
     ApiService.fetchPopularPosts().then((value) {
-      print("인기 질문들 $value");
       setState(() {
         popularPosts = value.toList();
+        filteredPopularPosts = popularPosts; // 검색 및 필터 적용 대상
       });
     });
   }
@@ -91,6 +111,23 @@ class _BoardScreenState extends State<BoardScreen>
     } else {
       setState(() {
         filteredPosts = posts
+            .where((post) =>
+                post.title.toLowerCase().contains(query.toLowerCase()) ||
+                post.content.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
+    }
+  }
+
+  // 인기글 검색
+  void _searchPopularPosts(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        filteredPopularPosts = popularPosts;
+      });
+    } else {
+      setState(() {
+        filteredPopularPosts = popularPosts
             .where((post) =>
                 post.title.toLowerCase().contains(query.toLowerCase()) ||
                 post.content.toLowerCase().contains(query.toLowerCase()))
@@ -134,7 +171,8 @@ class _BoardScreenState extends State<BoardScreen>
           PostSearch(
             onChanged: (value) {
               print('검색어: $value');
-              _searchPosts(value);
+              _searchPosts(value); // 전체글 검색
+              _searchPopularPosts(value); // 인기글 검색
             },
           ),
           Row(
@@ -169,7 +207,6 @@ class _BoardScreenState extends State<BoardScreen>
               ),
             ],
           ),
-
           // 탭별 콘텐츠
           Expanded(
             child: TabBarView(
@@ -186,7 +223,7 @@ class _BoardScreenState extends State<BoardScreen>
                 // 인기글
                 SingleChildScrollView(
                   child: QuestionList(
-                    posts: popularPosts,
+                    posts: filteredPopularPosts,
                     onRefresh: popularRefresh,
                     selectedFilters: selectedFilters,
                   ),
