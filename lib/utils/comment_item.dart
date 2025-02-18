@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CommentItem extends StatelessWidget {
   final int commentId;
@@ -19,6 +20,19 @@ class CommentItem extends StatelessWidget {
     required this.onDelete,
     required this.currentUserId,
   }) : super(key: key);
+
+  String _formatDate(String dateString) {
+    DateTime dateTime = DateFormat("yyyy-MM-dd HH:mm").parse(dateString);
+    DateTime now = DateTime.now();
+
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day) {
+      return DateFormat("HH:mm").format(dateTime);  // 오늘인 경우 시간만
+    } else {
+      return DateFormat("yyyy-MM-dd").format(dateTime);  // 오늘이 아닌 경우 날짜 전체
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +64,8 @@ class CommentItem extends StatelessWidget {
                         memberName,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                       ),
-                      const SizedBox(width: 8),
                       Text(
-                        time,
+                        _formatDate(time),
                         style: const TextStyle(color: Colors.grey),
                       ),
                     ],

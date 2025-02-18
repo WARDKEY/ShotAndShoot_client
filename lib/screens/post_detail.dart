@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shotandshoot/models/comment.dart';
 import 'package:shotandshoot/models/question.dart';
 import 'package:shotandshoot/service/api_service.dart';
@@ -59,6 +60,20 @@ class _PostDetailState extends State<PostDetail> {
     setState(() {
       _isLoggedIn = loggedIn;
     });
+  }
+
+  // 시간 형식 지정
+  String _formatDate(String dateString) {
+    DateTime dateTime = DateFormat("yyyy-MM-dd HH:mm").parse(dateString);
+    DateTime now = DateTime.now();
+
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day) {
+      return DateFormat("HH:mm").format(dateTime);  // 오늘인 경우 시간만
+    } else {
+      return DateFormat("yyyy-MM-dd").format(dateTime);  // 오늘이 아닌 경우 날짜 전체
+    }
   }
 
   @override
@@ -247,9 +262,8 @@ class _PostDetailState extends State<PostDetail> {
                 question.member,
                 style: const TextStyle(color: Colors.grey),
               ),
-              const SizedBox(width: 10),
               Text(
-                _question!.createAt.toString(),
+                _formatDate(_question!.createAt),
                 style: TextStyle(color: Colors.grey),
               ),
               const Spacer(),
