@@ -286,7 +286,7 @@ class _PostDetailState extends State<PostDetail> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AI 코멘트',
+                  'AI 댓글',
                   style: TextStyle(
                     color: const Color(0xff748d6f),
                     fontWeight: FontWeight.w400,
@@ -300,15 +300,35 @@ class _PostDetailState extends State<PostDetail> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          _aiComment,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
                         if (!_isAiCommentReady)
-                          CircularProgressIndicator(), // AI 댓글이 준비되지 않았으면 로딩 표시
+                          Center( // 로딩 화면 중앙 정렬
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 30,
+                                ),
+                                Text(
+                                  _aiComment,
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                CircularProgressIndicator(),
+                              ],
+                            ),
+                          )
+                        else
+                          Text(
+                            _aiComment,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                       ],
                     ),
                   ),
