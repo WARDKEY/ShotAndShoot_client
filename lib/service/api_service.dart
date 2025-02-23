@@ -728,4 +728,28 @@ class ApiService {
       throw Exception('Failed to get memberInfo');
     }
   }
+
+  static Future<Map<String, dynamic>> getWasteInfo(String wasteName) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/waste/$wasteName');
+
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    print('GET Response status: ${response.statusCode}');
+    print('GET Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse =
+      jsonDecode(utf8.decode(response.bodyBytes));
+      return jsonResponse;
+    } else {
+      throw Exception('Failed to get wasteInfo');
+    }
+  }
+
 }
