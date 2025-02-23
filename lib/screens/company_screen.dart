@@ -73,7 +73,7 @@ class _CompanyScreenState extends State<CompanyScreen> {
   Future<List<Company>> fetchCompany(
       String location, double lat, double lot) async {
     try {
-      final companyData = await _apiService.fetchCompanies(location);
+      final companyData = await _apiService.getCompanies(location);
 
       var latLng = NLatLng(lat, lot); // 현재 위치
 

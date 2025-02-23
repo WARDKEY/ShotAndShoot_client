@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:provider/provider.dart';
+import 'package:shotandshoot/screens/waste_detail.dart';
 import 'package:shotandshoot/utils/question_list.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,13 +26,13 @@ class _MainScreenState extends State<MainScreen> {
     "images/banner2.png",
   ];
   final List<Map<String, dynamic>> gridItems = [
-    {'image': 'images/paper.png', 'name': '종이류'},
+    {'image': 'images/paper.png', 'name': '종이'},
     {'image': 'images/metal.png', 'name': '고철'},
-    {'image': 'images/glass.png', 'name': '유리병'},
+    {'image': 'images/glass.png', 'name': '유리'},
     {'image': 'images/can.png', 'name': '캔'},
     {'image': 'images/plastic.png', 'name': '플라스틱'},
-    {'image': 'images/styrofoam.png', 'name': '스티로품'},
-    {'image': 'images/vinyl.png', 'name': '비닐류'},
+    {'image': 'images/styrofoam.png', 'name': '스티로폼'},
+    {'image': 'images/vinyl.png', 'name': '비닐'},
     {'image': 'images/clothes.png', 'name': '의류'},
   ];
 
@@ -45,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<Company?> fetchCompany() async {
     try {
-      final companyData = await _apiService.fetchCompany();
+      final companyData = await _apiService.getCompany();
       final company = companyData['company'] as Company;
       var latLng =
           NLatLng(companyData['point']['lat'], companyData['point']['lot']);
@@ -77,7 +78,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void refresh() {
-    ApiService.fetchPopularPosts().then((value) {
+    ApiService.getPopularPosts().then((value) {
       print("인기 질문들 $value");
       setState(() {
         posts = value.take(5).toList(); // 리스트에서 최대 5개만 저장
@@ -152,6 +153,11 @@ class _MainScreenState extends State<MainScreen> {
                       iconSize: 30,
                       onPressed: () {
                         print("폐기물 분리배출페이지 이동");
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => WasteDetail(wasteName: '종이'),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -167,6 +173,12 @@ class _MainScreenState extends State<MainScreen> {
                     return GestureDetector(
                       onTap: () {
                         print(item['name']);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                WasteDetail(wasteName: item['name']),
+                          ),
+                        );
                       },
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

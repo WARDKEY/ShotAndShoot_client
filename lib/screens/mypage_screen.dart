@@ -40,7 +40,7 @@ class _MypageScreenState extends State<MypageScreen>
 
   Future<MemberInfo?> fetchMember({int retryCount = 0}) async {
     try {
-      final response = await _apiService.fetchMypageData();
+      final response = await _apiService.getMypageData();
 
       if (response.statusCode == 200) {
         print('Response body: ${response.body}');
@@ -71,12 +71,12 @@ class _MypageScreenState extends State<MypageScreen>
 
   // 사용자가 작성한 질문 조회
   Future<List<Question>> fetchMyPosts() {
-    return _apiService.fetchMyPosts();
+    return _apiService.getMyPosts();
   }
 
   // 사용자가 작성한 댓글 조회
   Future<List<Comment>> fetchMyComments() {
-    return _apiService.fetchMyComments();
+    return _apiService.getMyComments();
   }
 
   @override

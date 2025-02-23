@@ -99,7 +99,7 @@ class _PostDetailState extends State<PostDetail> {
     _loadComments();
 
     // 질문 데이터 불러오기
-    ApiService.fetchQuestion(widget.questionId).then((value) {
+    ApiService.getQuestion(widget.questionId).then((value) {
       print("질문 내용 : ${value.content}");
       setState(() {
         _question = value;
@@ -111,7 +111,7 @@ class _PostDetailState extends State<PostDetail> {
 
   Future<void> _checkAiCommentStatus() async {
     try {
-      AiComments aiComment = await ApiService.fetchAiComment(widget.questionId);
+      AiComments aiComment = await ApiService.getAiComment(widget.questionId);
       setState(() {
         _isAiCommentReady = true;
         _aiComment = aiComment.content;
@@ -129,7 +129,7 @@ class _PostDetailState extends State<PostDetail> {
   Future<void> _loadComments() async {
     try {
       List<Comment> fetchedComments =
-          await ApiService.fetchComments(widget.questionId);
+          await ApiService.getComments(widget.questionId);
       setState(() {
         _comments = fetchedComments;
       });
