@@ -79,7 +79,7 @@ class ApiService {
     }
   }
 
-  Future<List<Company>> fetchCompanies(String location) async {
+  Future<List<Company>> getCompanies(String location) async {
     String ip = dotenv.get('IP');
     final url = Uri.http(ip, '/api/v1/wasteCompany/', {'location': location});
     String? accessToken = await _secureStorage.read(key: 'accessToken');
@@ -115,7 +115,7 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchCompany() async {
+  Future<Map<String, dynamic>> getCompany() async {
     String ip = dotenv.get('IP');
     final url = Uri.http(ip, '/api/v1/wasteCompany/near');
     String? accessToken = await _secureStorage.read(key: 'accessToken');
@@ -157,7 +157,7 @@ class ApiService {
     }
   }
 
-  Future<http.Response> fetchMypageData() async {
+  Future<http.Response> getMypageData() async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/member/');
     String? accessToken = await _secureStorage.read(key: 'accessToken');
@@ -364,7 +364,7 @@ class ApiService {
   }
 
   // questionId에 해당하는 질문 가져오기
-  static Future<Question> fetchQuestion(
+  static Future<Question> getQuestion(
     int questionId,
   ) async {
     String ip = dotenv.get('IP');
@@ -427,7 +427,7 @@ class ApiService {
   }
 
   // ai 댓글 가져오기
-  static Future<AiComments> fetchAiComment(
+  static Future<AiComments> getAiComment(
     int questionId,
   ) async {
     String ip = dotenv.get('IP');
@@ -488,7 +488,7 @@ class ApiService {
   }
 
   // 게시글 내 댓글 목록 조회
-  static Future<List<Comment>> fetchComments(int questionId) async {
+  static Future<List<Comment>> getComments(int questionId) async {
     String ip = dotenv.get('IP');
     final url = Uri.http(ip, '/api/v1/comment/$questionId');
 
@@ -542,7 +542,7 @@ class ApiService {
   }
 
   // 해당 사용자의 모든 댓글 조회
-  Future<List<Comment>> fetchMyComments() async {
+  Future<List<Comment>> getMyComments() async {
     String ip = dotenv.get('IP');
     final url = Uri.http(ip, '/api/v1/comment/my');
     String? accessToken = await _secureStorage.read(key: 'accessToken');
@@ -621,7 +621,7 @@ class ApiService {
   }
 
   // 모든 게시글(질문) 조회
-  static Future<List<Question>> fetchPosts() async {
+  static Future<List<Question>> getPosts() async {
     String ip = dotenv.get('IP');
     final url = Uri.http(ip, '/api/v1/question/');
 
@@ -648,7 +648,7 @@ class ApiService {
   }
 
   // 특정 사용자가 작성한 모든 게시글(질문) 조회
-  Future<List<Question>> fetchMyPosts() async {
+  Future<List<Question>> getMyPosts() async {
     String ip = dotenv.get('IP');
     final url = Uri.http(ip, '/api/v1/question/my');
     String? accessToken = await _secureStorage.read(key: 'accessToken');
@@ -677,7 +677,7 @@ class ApiService {
   }
 
   // 인기글 조회
-  static Future<List<Question>> fetchPopularPosts() async {
+  static Future<List<Question>> getPopularPosts() async {
     String ip = dotenv.get('IP');
     final url = Uri.http(ip, '/api/v1/question/popular');
 

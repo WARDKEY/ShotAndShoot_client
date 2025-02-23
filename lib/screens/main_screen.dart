@@ -45,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<Company?> fetchCompany() async {
     try {
-      final companyData = await _apiService.fetchCompany();
+      final companyData = await _apiService.getCompany();
       final company = companyData['company'] as Company;
       var latLng =
           NLatLng(companyData['point']['lat'], companyData['point']['lot']);
@@ -77,7 +77,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void refresh() {
-    ApiService.fetchPopularPosts().then((value) {
+    ApiService.getPopularPosts().then((value) {
       print("인기 질문들 $value");
       setState(() {
         posts = value.take(5).toList(); // 리스트에서 최대 5개만 저장

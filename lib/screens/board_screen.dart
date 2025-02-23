@@ -84,7 +84,7 @@ class _BoardScreenState extends State<BoardScreen>
   }
 
   Future<void> refresh() async {
-    final postData = await ApiService.fetchPosts();
+    final postData = await ApiService.getPosts();
 
     setState(() {
       posts = postData;
@@ -94,7 +94,7 @@ class _BoardScreenState extends State<BoardScreen>
 
   // 인기글 갱신
   void popularRefresh() {
-    ApiService.fetchPopularPosts().then((value) {
+    ApiService.getPopularPosts().then((value) {
       setState(() {
         popularPosts = value.toList();
         filteredPopularPosts = popularPosts; // 검색 및 필터 적용 대상
