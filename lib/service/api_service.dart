@@ -703,6 +703,33 @@ class ApiService {
     }
   }
 
+  // 댓글 삭제
+  static Future<void> deletePost(int questionId) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/question/$questionId');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      print('DELETE Response status: ${response.statusCode}');
+      print('DELETE Response body: ${response.body}');
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete question');
+      }
+    } catch (e) {
+      print('HTTP DELETE 에러: $e');
+      throw Exception('Error: $e');
+    }
+  }
+
   // 회원의 이름과 주소 조회
   Future<Map<String, dynamic>> getMemberInfo() async {
     String ip = dotenv.get('IP');
@@ -729,6 +756,28 @@ class ApiService {
     }
   }
 
+  // 질문 글 작성자 여부 확인
+  static Future<bool> checkQuestionIfAuthor(int questionId) async {
+    String ip = dotenv.get('IP');
+    final url = Uri.parse('http://$ip/api/v1/member/$questionId/is-author');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
+
+    final response = await http.get(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as bool;
+    } else {
+      throw Exception("작성자 여부 확인 실패");
+    }
+  }
+
+  // 쓰레기 정보 가져오기
   static Future<Map<String, dynamic>> getWasteInfo(String wasteName) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/waste/$wasteName');
@@ -745,11 +794,10 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse =
-      jsonDecode(utf8.decode(response.bodyBytes));
+          jsonDecode(utf8.decode(response.bodyBytes));
       return jsonResponse;
     } else {
       throw Exception('Failed to get wasteInfo');
     }
   }
-
 }

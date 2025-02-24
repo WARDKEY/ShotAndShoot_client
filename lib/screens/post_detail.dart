@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shotandshoot/models/comment.dart';
 import 'package:shotandshoot/models/question.dart';
+import 'package:shotandshoot/screens/board_screen.dart';
 import 'package:shotandshoot/service/api_service.dart';
 import 'package:shotandshoot/service/token_service.dart';
 
@@ -44,6 +45,7 @@ class _PostDetailState extends State<PostDetail> {
   Question? _question;
   final TokenService _tokenService = TokenService();
   bool _isLoggedIn = false;
+  bool _isAuthor = false;
 
   late Timer _timer;
   bool _isAiCommentReady = false;
@@ -70,18 +72,19 @@ class _PostDetailState extends State<PostDetail> {
     if (dateTime.year == now.year &&
         dateTime.month == now.month &&
         dateTime.day == now.day) {
-      return DateFormat("HH:mm").format(dateTime);  // 오늘인 경우 시간만
+      return DateFormat("HH:mm").format(dateTime); // 오늘인 경우 시간만
     } else {
-      return DateFormat("yyyy-MM-dd").format(dateTime);  // 오늘이 아닌 경우 날짜 전체
+      return DateFormat("yyyy-MM-dd").format(dateTime); // 오늘이 아닌 경우 날짜 전체
     }
   }
 
   @override
   void initState() {
     super.initState();
-
     // 로그인 여부 확인
     _checkLogin();
+
+    _checkAuthorStatus();
 
     // 로그인한 사용자의 userId 불러오기
     ApiService.getUserId().then((value) {
@@ -107,6 +110,18 @@ class _PostDetailState extends State<PostDetail> {
     }).catchError((error) {
       print("질문 불러오기 에러: $error");
     });
+  }
+
+  // 작성자 여부 확인
+  Future<void> _checkAuthorStatus() async {
+    try {
+      bool result = await ApiService.checkQuestionIfAuthor(widget.questionId);
+      setState(() {
+        _isAuthor = result;
+      });
+    } catch (e) {
+      print("작성자 확인 오류: $e");
+    }
   }
 
   Future<void> _checkAiCommentStatus() async {
@@ -165,6 +180,20 @@ class _PostDetailState extends State<PostDetail> {
       await _updateFinishState();
     } catch (e) {
       print('댓글 삭제 에러: $e');
+    }
+  }
+
+  // 질문 삭제
+  Future<void> _deletePost(int questionId) async {
+    try {
+      await ApiService.deletePost(questionId);
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => BoardScreen(),
+        ),
+      );
+    } catch (e) {
+      print('질문 삭제 에러: $e');
     }
   }
 
@@ -246,12 +275,29 @@ class _PostDetailState extends State<PostDetail> {
               ),
               const SizedBox(width: 8),
               Expanded(
+                // 제목을 최대한 차지하도록 설정
                 child: Text(
                   question.title,
                   style: const TextStyle(
-                      fontSize: 19, fontWeight: FontWeight.bold),
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
                 ),
               ),
+              if (_isAuthor)
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () async {
+                    _deletePost(widget.questionId);
+                    print('질문 삭제 완료');
+                  },
+                  icon: const Icon(
+                    Icons.delete,
+                    size: 16,
+                    color: Color(0xffac2323),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 8),
@@ -315,7 +361,8 @@ class _PostDetailState extends State<PostDetail> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (!_isAiCommentReady)
-                          Center( // 로딩 화면 중앙 정렬
+                          Center(
+                            // 로딩 화면 중앙 정렬
                             child: Column(
                               children: [
                                 SizedBox(
@@ -421,10 +468,21 @@ class _PostDetailState extends State<PostDetail> {
                         }
                       }
                     : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff748d6f),
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.black.withOpacity(0.2),
+                ),
                 child: const Text(
                   '등록',
                   style: TextStyle(
-                    color: Color(0xff748d6f),
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
