@@ -71,10 +71,9 @@ class _PostWriteState extends State<PostWrite> {
             child: Text(
               '완료',
               style: TextStyle(
-                color: isFinish() ? const Color(0xff748d6f) : Colors.grey,
-                fontWeight: FontWeight.w500,
-                fontSize: 18
-              ),
+                  color: isFinish() ? const Color(0xff748d6f) : Colors.grey,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 18),
             ),
           ),
         ],
@@ -86,12 +85,22 @@ class _PostWriteState extends State<PostWrite> {
             const SizedBox(height: 20),
             TextField(
               controller: _titleController,
+              onChanged: (text) {
+                if (text.characters.length > 16) {
+                  _titleController.text = text.characters.take(15).toString();
+                }
+              },
               decoration: const InputDecoration(
                 labelText: '제목',
                 labelStyle: TextStyle(
                   color: Colors.grey,
                   fontSize: 20,
                 ),
+                hintText: ' 15자 이내로 입력 가능합니다.',
+                hintStyle: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 15,
+                )
               ),
             ),
             const SizedBox(height: 30),
@@ -120,8 +129,7 @@ class _PostWriteState extends State<PostWrite> {
               children: [
                 Text(
                   '내용',
-                  style: TextStyle(fontSize: 20,
-                  fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
