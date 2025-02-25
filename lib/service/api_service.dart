@@ -491,13 +491,19 @@ class ApiService {
   static Future<List<Comment>> getComments(int questionId) async {
     String ip = dotenv.get('IP');
     final url = Uri.http(ip, '/api/v1/comment/$questionId');
+    String? accessToken = await _secureStorage.read(key: 'accessToken');
 
     Map<String, String> headers = {
-      'Content-Type': 'application/json; charset=UTF-8',
+      'Content-Type': 'application/json',
     };
 
+    if (accessToken != null) {
+      headers['Authorization'] = 'Bearer $accessToken';
+    }
+
+
     try {
-      final response = await http.get(url, headers: headers);
+      final response = await http.get(url, headers: headers,);
 
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);

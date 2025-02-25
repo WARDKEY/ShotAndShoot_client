@@ -7,8 +7,8 @@ class CommentItem extends StatelessWidget {
   final String memberName;
   final String time;
   final String content;
+  final bool isAuthor;
   final Function(int) onDelete;
-  final String currentUserId; // 현재 로그인한 사용자 ID
 
   const CommentItem({
     Key? key,
@@ -17,10 +17,11 @@ class CommentItem extends StatelessWidget {
     required this.memberName,
     required this.time,
     required this.content,
+    required this.isAuthor,
     required this.onDelete,
-    required this.currentUserId,
   }) : super(key: key);
 
+  // 시간 형식 지정
   String _formatDate(String dateString) {
     DateTime dateTime = DateFormat("yyyy-MM-dd HH:mm").parse(dateString);
     DateTime now = DateTime.now();
@@ -28,16 +29,18 @@ class CommentItem extends StatelessWidget {
     if (dateTime.year == now.year &&
         dateTime.month == now.month &&
         dateTime.day == now.day) {
-      return DateFormat("HH:mm").format(dateTime);  // 오늘인 경우 시간만
+      return DateFormat("HH:mm").format(dateTime); // 오늘인 경우 시간만
+    } else if (dateTime.year == now.year) {
+      return DateFormat("MM-dd").format(dateTime);
     } else {
-      return DateFormat("yyyy-MM-dd").format(dateTime);  // 오늘이 아닌 경우 날짜 전체
+      return DateFormat("yyyy-MM-dd").format(dateTime); // 오늘이 아닌 경우 날짜 전체
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // API로 받아온 owner가 null이면 아직 로딩 중으로 간주하고, 로딩 중일 때는 삭제 버튼을 표시하지 않습니다.
-    bool isOwner = (userId != null && userId == currentUserId);
+    bool isOwner = isAuthor;
+    print("작성 여부 확인 -------=========== $isOwner");
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 0.0),
@@ -62,7 +65,8 @@ class CommentItem extends StatelessWidget {
                     children: [
                       Text(
                         memberName,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 17),
                       ),
                       Text(
                         _formatDate(time),
@@ -79,8 +83,8 @@ class CommentItem extends StatelessWidget {
                       await onDelete(commentId);
                     },
                     icon: const Icon(
-                      Icons.delete,
-                      size: 16,
+                      Icons.delete_forever_outlined,
+                      size: 20,
                       color: Color(0xffac2323),
                     ),
                   ),

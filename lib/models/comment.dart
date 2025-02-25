@@ -4,6 +4,7 @@ class Comment {
   final int questionId;
   final String memberName;
   final String createdAt;
+  final bool isAuthor;
 
   Comment({
     required this.commentId,
@@ -11,6 +12,7 @@ class Comment {
     required this.questionId,
     required this.memberName,
     required this.createdAt,
+    required this.isAuthor,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Comment {
       questionId: json['questionId'] as int,
       memberName: json['memberName'] as String,
       createdAt: json['createdAt'] as String,
+      isAuthor: json['isAuthor'] as bool,
     );
   }
 }

@@ -283,7 +283,9 @@ class _MypageScreenState extends State<MypageScreen>
                                   .data![index]; // Comment 객체 가져오기
                               return ListTile(
                                 title: Text(comment.content), // Comment 내용 표시
-                                subtitle: Text(comment.createdAt.toString()),
+                                subtitle: Text(
+                                  comment.createdAt.toString(),
+                                ),
                               );
                             },
                           );
