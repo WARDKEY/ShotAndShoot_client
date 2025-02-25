@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shotandshoot/models/comment.dart';
 import 'package:shotandshoot/models/question.dart';
-import 'package:shotandshoot/screens/board_screen.dart';
 import 'package:shotandshoot/service/api_service.dart';
 import 'package:shotandshoot/service/token_service.dart';
 
@@ -12,14 +11,14 @@ import '../models/AiComments.dart';
 import '../utils/comment_item.dart';
 
 final Map<String, Color> _categoryColors = {
-  '종이': Colors.brown,
-  '고철': Colors.grey,
-  '유리': Colors.blue,
-  '캔': Colors.green,
-  '플라스틱': Colors.orange,
-  '스티로폼': Colors.purple,
-  '비닐': Colors.pink,
-  '의류': Colors.red,
+  '종이': Color(0xff8B4513),
+  '고철': Color(0xff696969),
+  '유리': Color(0xff4169E1),
+  '캔': Color(0xff6B8E23),
+  '플라스틱': Color(0xff4B0082),
+  '스티로폼': Color(0xff2F4F4F),
+  '비닐': Color(0xff778899),
+  '의류': Color(0xffAC2323),
   '기타': Colors.black,
 };
 
@@ -50,9 +49,6 @@ class _PostDetailState extends State<PostDetail> {
   late Timer _timer;
   bool _isAiCommentReady = false;
   String _aiComment = "AI 댓글을 기다리는 중...";
-
-  // 현재 로그인한 사용자의 ID (실제 로그인 로직에 따라 할당)
-  String _currentUserId = "";
 
   // 각 댓글(commentId)에 대한 작성자 userId를 저장하는 Map
   final Map<int, String> _commentOwners = {};
@@ -85,14 +81,6 @@ class _PostDetailState extends State<PostDetail> {
     _checkLogin();
 
     _checkAuthorStatus();
-
-    // 로그인한 사용자의 userId 불러오기
-    ApiService.getUserId().then((value) {
-      print("현재 로그인한 userId 확인 ${value.toString()}");
-      setState(() {
-        _currentUserId = value.toString() ?? ""; // 로그아웃 시 빈 문자열 할당
-      });
-    });
 
     _timer = Timer.periodic(Duration(seconds: 7), (timer) {
       _checkAiCommentStatus();
@@ -148,18 +136,6 @@ class _PostDetailState extends State<PostDetail> {
       setState(() {
         _comments = fetchedComments;
       });
-      // 각 댓글에 대해 작성자 userId를 가져옴
-      for (var comment in fetchedComments) {
-        try {
-          String owner =
-              await ApiService.getUserIdFromCommentId(comment.commentId);
-          setState(() {
-            _commentOwners[comment.commentId] = owner;
-          });
-        } catch (e) {
-          print('댓글 ${comment.commentId} 작성자 정보 가져오기 실패: $e');
-        }
-      }
     } catch (e) {
       print('댓글 목록 불러오기 에러: $e');
     }
@@ -187,11 +163,7 @@ class _PostDetailState extends State<PostDetail> {
   Future<void> _deletePost(int questionId) async {
     try {
       await ApiService.deletePost(questionId);
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => BoardScreen(),
-        ),
-      );
+      Navigator.pop(context, true);
     } catch (e) {
       print('질문 삭제 에러: $e');
     }
@@ -293,38 +265,40 @@ class _PostDetailState extends State<PostDetail> {
                     print('질문 삭제 완료');
                   },
                   icon: const Icon(
-                    Icons.delete,
-                    size: 16,
+                    Icons.delete_forever_outlined,
+                    size: 20,
                     color: Color(0xffac2323),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
           // 작성자 및 조회수
-          Row(
-            children: [
-              Text(
-                question.member,
-                style: const TextStyle(color: Colors.grey),
-              ),
-              Text(
-                _formatDate(_question!.createAt),
-                style: TextStyle(color: Colors.grey),
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  const Icon(Icons.remove_red_eye,
-                      size: 16, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${question.view}',
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 13, 0),
+            child: Row(
+              children: [
+                Text(
+                  question.member,
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                Text(
+                  _formatDate(_question!.createAt),
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    const Icon(Icons.remove_red_eye,
+                        size: 16, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${question.view}',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           // 질문 내용
@@ -421,7 +395,6 @@ class _PostDetailState extends State<PostDetail> {
                     itemCount: _comments.length,
                     itemBuilder: (context, index) {
                       final comment = _comments[index];
-                      // _commentOwners[comment.commentId]
                       String? owner = _commentOwners[comment.commentId];
                       return CommentItem(
                         commentId: comment.commentId,
@@ -429,7 +402,7 @@ class _PostDetailState extends State<PostDetail> {
                         memberName: comment.memberName,
                         time: comment.createdAt,
                         content: comment.content,
-                        currentUserId: _currentUserId,
+                        isAuthor: comment.isAuthor,
                         onDelete: _deleteComment,
                       );
                     },

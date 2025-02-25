@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shotandshoot/models/question.dart';
 import '../screens/post_detail.dart';
+
 // 카테고리별 색상 설정
 final Map<String, Color> _categoryColors = {
-  '종이': Colors.brown,
-  '고철': Colors.grey,
-  '유리': Colors.blue,
-  '캔': Colors.green,
-  '플라스틱': Colors.orange,
-  '스티로폼': Colors.purple,
-  '비닐': Colors.pink,
-  '의류': Colors.red,
+  '종이': Color(0xff8B4513),
+  '고철': Color(0xff696969),
+  '유리': Color(0xff4169E1),
+  '캔': Color(0xff6B8E23),
+  '플라스틱': Color(0xff4B0082),
+  '스티로폼': Color(0xff2F4F4F),
+  '비닐': Color(0xff778899),
+  '의류': Color(0xffAC2323),
   '기타': Colors.black,
 };
 
@@ -45,9 +46,11 @@ class QuestionList extends StatelessWidget {
     if (dateTime.year == now.year &&
         dateTime.month == now.month &&
         dateTime.day == now.day) {
-      return DateFormat("HH:mm").format(dateTime);  // 오늘인 경우 시간만
+      return DateFormat("HH:mm").format(dateTime); // 오늘인 경우 시간만
+    } else if (dateTime.year == now.year) {
+      return DateFormat("MM-dd").format(dateTime);
     } else {
-      return DateFormat("yyyy-MM-dd").format(dateTime);  // 오늘이 아닌 경우 날짜 전체
+      return DateFormat("yyyy-MM-dd").format(dateTime); // 오늘이 아닌 경우 날짜 전체
     }
   }
 
@@ -86,7 +89,7 @@ class QuestionList extends StatelessWidget {
                         horizontal: 7,
                         vertical: 3,
                       ),
-                      margin: const EdgeInsets.only(bottom: 5, right: 10),
+                      margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         color: categoryColor,
                         border: Border.all(color: categoryColor),
