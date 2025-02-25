@@ -187,19 +187,20 @@ class _BoardScreenState extends State<BoardScreen>
                         padding: const EdgeInsets.only(right: 8.0),
                         // 필터 간 간격 추가
                         child: Chip(
-                          label: Text(filter),
-                          side: const BorderSide(
-                              width: 1.0, color: Color(0xff748d6f)),
-                          labelStyle: const TextStyle(color: Color(0xff748d6f)),
-                          backgroundColor: Colors.white,
-                          deleteIcon: const Icon(Icons.clear),
-                          onDeleted: () {
-                            setState(() {
-                              selectedFilters.remove(filter);
-                              _filters[filter] = false;
-                            });
-                          },
-                        ),
+                            label: Text(filter),
+                            side: const BorderSide(
+                                width: 1.0, color: Color(0xff748d6f)),
+                            labelStyle:
+                                const TextStyle(color: Color(0xff748d6f)),
+                            backgroundColor: Colors.white,
+                            deleteIcon: const Icon(Icons.clear),
+                            onDeleted: () {
+                              setState(() {
+                                selectedFilters.remove(filter);
+                                _filters[filter] = false;
+                              });
+                              _applyFilters(_filters);
+                            }),
                       );
                     }).toList(),
                   ),
