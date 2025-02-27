@@ -131,10 +131,21 @@ class _UserEditState extends State<UserEdit> {
                     padding: const EdgeInsets.only(bottom: 25),
                     child: TextField(
                       controller: _controllers[0],
+                      onChanged: (text) {
+                        if (text.characters.length > 12) {
+                          _controllers[0].text =
+                              text.characters.take(12).toString();
+                        }
+                      },
                       decoration: InputDecoration(
                         labelText: _labels[0],
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
+                        ),
+                        hintText: ' 12자 이내로 입력 가능합니다.',
+                        hintStyle: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey,
                         ),
                       ),
                     ),
@@ -149,8 +160,22 @@ class _UserEditState extends State<UserEdit> {
                           builder: (context) {
                             return KpostalView(
                               callback: (Kpostal result) {
-                                // receiverZipController.text = result.postCode;
-                                _controllers[1].text = result.address;
+                                String updatedAddress = result.address
+                                    .replaceFirst(RegExp(r'^경기\s'), '경기도 ')
+                                    .replaceFirst(RegExp(r'^서울\s'), '서울특별시 ')
+                                    .replaceFirst(RegExp(r'^부산\s'), '부산광역시 ')
+                                    .replaceFirst(RegExp(r'^인천\s'), '인천광역시 ')
+                                    .replaceFirst(RegExp(r'^대구\s'), '대구광역시 ')
+                                    .replaceFirst(RegExp(r'^부산\s'), '부산광역시 ')
+                                    .replaceFirst(RegExp(r'^광주\s'), '광주광역시 ')
+                                    .replaceFirst(RegExp(r'^대전\s'), '대전광역시 ')
+                                    .replaceFirst(RegExp(r'^울산\s'), '울산광역시 ')
+                                    .replaceFirst(RegExp(r'^충북\s'), '충청북도 ')
+                                    .replaceFirst(RegExp(r'^충남\s'), '충청남도 ')
+                                    .replaceFirst(RegExp(r'^전남\s'), '전라남도 ')
+                                    .replaceFirst(RegExp(r'^경남\s'), '경상남도 ')
+                                    .replaceFirst(RegExp(r'^경북\s'), '경상북도 ');
+                                _controllers[1].text = updatedAddress;
                                 print(
                                     '============ Address: ${_controllers[1].text}');
                                 print(
@@ -172,10 +197,21 @@ class _UserEditState extends State<UserEdit> {
                     padding: const EdgeInsets.only(bottom: 25),
                     child: TextField(
                       controller: _controllers[2],
+                      onChanged: (text) {
+                        if (text.characters.length > 20) {
+                          _controllers[2].text =
+                              text.characters.take(20).toString();
+                        }
+                      },
                       decoration: InputDecoration(
                         labelText: "상세 주소",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
+                        ),
+                        hintText: ' 상세 주소를 입력해주세요.',
+                        hintStyle: TextStyle(
+                          fontSize: 18,
+                          color: Colors.grey,
                         ),
                       ),
                     ),

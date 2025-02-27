@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kpostal/kpostal.dart';
 import 'package:shotandshoot/screens/signin_success_screen.dart';
 import 'package:shotandshoot/service/api_service.dart';
@@ -83,6 +84,11 @@ class _PostUserInfoState extends State<PostUserInfo> {
           ),
           TextField(
             controller: _nickNameController,
+            onChanged: (text) {
+              if (text.characters.length > 12) {
+                _nickNameController.text = text.characters.take(12).toString();
+              }
+            },
             decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -92,6 +98,11 @@ class _PostUserInfoState extends State<PostUserInfo> {
               ),
               labelText: '닉네임',
               labelStyle: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+              hintText: ' 12자 이내로 입력 가능합니다.',
+              hintStyle: TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
               ),
@@ -117,6 +128,15 @@ class _PostUserInfoState extends State<PostUserInfo> {
           ),
           TextField(
             controller: _phoneNumberController,
+            onChanged: (text) {
+              if (text.characters.length > 11) {
+                _phoneNumberController.text =
+                    text.characters.take(11).toString();
+              }
+            },
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly, // 전화번호는 숫자로 제한
+            ],
             decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -126,6 +146,11 @@ class _PostUserInfoState extends State<PostUserInfo> {
               ),
               labelText: '전화번호',
               labelStyle: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+              hintText: ' \"-\"를 제외하고 입력해주세요.',
+              hintStyle: TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
               ),
@@ -157,8 +182,22 @@ class _PostUserInfoState extends State<PostUserInfo> {
                 builder: (context) {
                   return KpostalView(
                     callback: (Kpostal result) {
-                      // receiverZipController.text = result.postCode;
-                      _addressController.text = result.address;
+                      String updatedAddress = result.address
+                          .replaceFirst(RegExp(r'^경기\s'), '경기도 ')
+                          .replaceFirst(RegExp(r'^서울\s'), '서울특별시 ')
+                          .replaceFirst(RegExp(r'^부산\s'), '부산광역시 ')
+                          .replaceFirst(RegExp(r'^인천\s'), '인천광역시 ')
+                          .replaceFirst(RegExp(r'^대구\s'), '대구광역시 ')
+                          .replaceFirst(RegExp(r'^부산\s'), '부산광역시 ')
+                          .replaceFirst(RegExp(r'^광주\s'), '광주광역시 ')
+                          .replaceFirst(RegExp(r'^대전\s'), '대전광역시 ')
+                          .replaceFirst(RegExp(r'^울산\s'), '울산광역시 ')
+                          .replaceFirst(RegExp(r'^충북\s'), '충청북도 ')
+                          .replaceFirst(RegExp(r'^충남\s'), '충청남도 ')
+                          .replaceFirst(RegExp(r'^전남\s'), '전라남도 ')
+                          .replaceFirst(RegExp(r'^경남\s'), '경상남도 ')
+                          .replaceFirst(RegExp(r'^경북\s'), '경상북도 ');
+                      _addressController.text = updatedAddress;
                     },
                   );
                 },
@@ -198,6 +237,12 @@ class _PostUserInfoState extends State<PostUserInfo> {
           ),
           TextField(
             controller: _detailAddressController,
+            onChanged: (text) {
+              if (text.characters.length > 20) {
+                _detailAddressController.text =
+                    text.characters.take(20).toString();
+              }
+            },
             decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -205,8 +250,13 @@ class _PostUserInfoState extends State<PostUserInfo> {
                   width: 1.0,
                 ),
               ),
-              labelText: '상세주소',
+              labelText: '상세 주소',
               labelStyle: TextStyle(
+                fontSize: 18,
+                color: Colors.grey,
+              ),
+              hintText: ' 상세 주소를 입력해주세요.',
+              hintStyle: TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
               ),
