@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:shotandshoot/models/memberInfo.dart';
 import 'package:shotandshoot/screens/login_screen.dart';
 import 'package:shotandshoot/screens/signin_screen.dart';
@@ -28,6 +29,22 @@ class _MypageScreenState extends State<MypageScreen>
   Future<MemberInfo?>? _futureMember;
   late Future<List<Question>> _futureMyPosts;
   late Future<List<Comment>> _futureMyComments;
+
+  // 시간 형식 지정
+  String _formatDate(String dateString) {
+    DateTime dateTime = DateFormat("yyyy-MM-dd HH:mm").parse(dateString);
+    DateTime now = DateTime.now();
+
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day) {
+      return DateFormat("HH:mm").format(dateTime); // 오늘인 경우 시간만
+    } else if (dateTime.year == now.year) {
+      return DateFormat("MM-dd").format(dateTime);
+    } else {
+      return DateFormat("yyyy-MM-dd").format(dateTime); // 오늘이 아닌 경우 날짜 전체
+    }
+  }
 
   @override
   void initState() {
@@ -284,7 +301,9 @@ class _MypageScreenState extends State<MypageScreen>
                               return ListTile(
                                 title: Text(comment.content), // Comment 내용 표시
                                 subtitle: Text(
-                                  comment.createdAt.toString(),
+                                  _formatDate(
+                                    comment.createdAt.toString(),
+                                  ),
                                 ),
                               );
                             },

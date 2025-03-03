@@ -11,6 +11,7 @@ import '../models/AiComments.dart';
 import '../models/company.dart';
 import '../models/memberInfo.dart';
 import '../models/question.dart';
+import '../models/waste.dart';
 
 class ApiService {
   final TokenService tokenService = TokenService();
@@ -784,7 +785,7 @@ class ApiService {
   }
 
   // 쓰레기 정보 가져오기
-  static Future<Map<String, dynamic>> getWasteInfo(String wasteName) async {
+  static Future<Waste> getWasteInfo(String wasteName) async {
     String ip = dotenv.get('IP');
     final url = Uri.parse('http://$ip/api/v1/waste/$wasteName');
 
@@ -799,9 +800,9 @@ class ApiService {
     print('GET Response body: ${response.body}');
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse =
+      var jsonResponse =
           jsonDecode(utf8.decode(response.bodyBytes));
-      return jsonResponse;
+      return Waste.fromJson(jsonResponse);
     } else {
       throw Exception('Failed to get wasteInfo');
     }
