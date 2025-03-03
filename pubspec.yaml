@@ -54,6 +54,7 @@ dependencies:
   google_sign_in: ^6.2.2
   kpostal: ^1.1.0
   intl: ^0.20.2
+  youtube_player_flutter: ^9.1.1
 
 dev_dependencies:
   flutter_test:

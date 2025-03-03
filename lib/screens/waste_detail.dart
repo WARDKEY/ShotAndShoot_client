@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shotandshoot/models/waste.dart';
 import 'package:shotandshoot/service/api_service.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class WasteDetail extends StatefulWidget {
   final String wasteName;
@@ -23,13 +24,23 @@ class _WasteDetailState extends State<WasteDetail> {
     '의류',
   ];
   late String _selectedCategory;
+
   Waste? wasteInfo;
+
+  late YoutubePlayerController _youtubeController;
 
   @override
   void initState() {
     super.initState();
     _selectedCategory = widget.wasteName;
     _fetchWasteData(_selectedCategory);
+    _youtubeController = YoutubePlayerController(
+      initialVideoId: 'yYQCHZbrgB4', // 유튜브 아이디 지정
+      flags: const YoutubePlayerFlags(
+        autoPlay: false,
+        mute: false,
+      ),
+    );
   }
 
   // 서버에서 쓰레기 정보 가져오기
@@ -43,6 +54,8 @@ class _WasteDetailState extends State<WasteDetail> {
 
   @override
   Widget build(BuildContext context) {
+    double cardWidth = MediaQuery.of(context).size.width - 32; // 카드 너비
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -55,9 +68,9 @@ class _WasteDetailState extends State<WasteDetail> {
                 if (newValue != null) {
                   setState(() {
                     _selectedCategory = newValue;
-                    wasteInfo = null; // 새로운 데이터를 불러올 동안 로딩 상태
+                    wasteInfo = null;
                   });
-                  _fetchWasteData(newValue); // 새 카테고리에 대한 데이터 가져오기
+                  _fetchWasteData(newValue);
                 }
               },
               items: _categories.map<DropdownMenuItem<String>>((String value) {
@@ -67,44 +80,67 @@ class _WasteDetailState extends State<WasteDetail> {
                     value,
                     style: const TextStyle(
                       fontSize: 22,
-                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 );
               }).toList(),
               underline: const SizedBox(),
               icon: const Icon(Icons.arrow_drop_down, size: 30),
-              padding: EdgeInsets.zero,
-              dropdownColor: Colors.white,
             ),
           ],
         ),
       ),
       body: wasteInfo == null
-          ? const Center(child: CircularProgressIndicator()) // 로딩 중
-          : wasteInfo!.wasteSortingInfo.isEmpty
-              ? const Center(
-                  child: Text('정보 없음', style: TextStyle(fontSize: 18)))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: wasteInfo!.wasteSortingInfo.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                      color: Colors.grey[100],
-                      margin: EdgeInsets.symmetric(vertical: 15),
-                      child: ListTile(
-                        title: Text(
-                          wasteInfo!.wasteSortingInfo[index],
-                          style: const TextStyle(fontSize: 20),
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  wasteInfo!.wasteSortingInfo.isEmpty
+                      ? const Center(
+                          child: Text('정보 없음', style: TextStyle(fontSize: 18)))
+                      : ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.all(16),
+                          itemCount: wasteInfo!.wasteSortingInfo.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              color: Colors.grey[100],
+                              margin: const EdgeInsets.symmetric(vertical: 15),
+                              child: ListTile(
+                                title: Text(
+                                  wasteInfo!.wasteSortingInfo[index],
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            );
+                          },
                         ),
+                  const SizedBox(height: 23),
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: YoutubePlayer(
+                        controller: _youtubeController,
+                        showVideoProgressIndicator: true,
+                        aspectRatio: 16 / 9,
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
     );
   }
 }
