@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shotandshoot/models/waste.dart';
 import 'package:shotandshoot/service/api_service.dart';
 
 class WasteDetail extends StatefulWidget {
@@ -22,7 +23,7 @@ class _WasteDetailState extends State<WasteDetail> {
     '의류',
   ];
   late String _selectedCategory;
-  Map<String, dynamic>? wasteInfo;
+  Waste? wasteInfo;
 
   @override
   void initState() {
@@ -79,22 +80,31 @@ class _WasteDetailState extends State<WasteDetail> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: SizedBox(
-          height: 100,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              wasteInfo == null
-                  ? const CircularProgressIndicator() // 데이터 로딩
-                  : Text(
-                      '분리수거 방법: ${wasteInfo!['wasteSortingInfo'] ?? '정보 없음'}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-            ],
-          ),
-        ),
-      ),
+      body: wasteInfo == null
+          ? const Center(child: CircularProgressIndicator()) // 로딩 중
+          : wasteInfo!.wasteSortingInfo.isEmpty
+              ? const Center(
+                  child: Text('정보 없음', style: TextStyle(fontSize: 18)))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: wasteInfo!.wasteSortingInfo.length,
+                  itemBuilder: (context, index) {
+                    return Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                      color: Colors.grey[100],
+                      margin: EdgeInsets.symmetric(vertical: 15),
+                      child: ListTile(
+                        title: Text(
+                          wasteInfo!.wasteSortingInfo[index],
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }
