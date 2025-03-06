@@ -87,30 +87,112 @@ class _ScanDetailState extends State<ScanDetail> {
   }
 
   Widget _buildScanInfoView(ScanInfo scanInfo) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
+    return Column(
       children: [
-        Image.memory(base64Decode(scanInfo.imgUrl)),
-        const SizedBox(height: 16),
-        ...scanInfo.predictions.map((prediction) => Card(
-              color: Color(0xfff9f9f9),
-              child: ExpansionTile(
-                shape: const Border(),
-                initiallyExpanded: true,
-                title: Text('${prediction.category} [${prediction.count}]'),
-                children: (prediction.wasteSortingInfo ?? [])
-                    .map((item) => ListTile(
-                          dense: true,
-                          visualDensity:
-                              VisualDensity(horizontal: 0, vertical: -4),
-                          title: Text(
-                            item,
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ))
-                    .toList(),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Image.memory(base64Decode(scanInfo.imgUrl)),
+              const SizedBox(height: 16),
+              ...scanInfo.predictions.map((prediction) => Card(
+                    color: const Color(0xfff9f9f9),
+                    child: ExpansionTile(
+                      shape: const Border(),
+                      initiallyExpanded: true,
+                      title: Text(
+                        '${prediction.category} [${prediction.count}개]',
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w600),
+                      ),
+                      children: [
+                        ...(prediction.wasteSortingInfo ?? [])
+                            .asMap()
+                            .entries
+                            .expand((entry) {
+                          final index = entry.key;
+                          final item = entry.value;
+                          final parts = item.split(':');
+
+                          return [
+                            Column(
+                              children: [
+                                ListTile(
+                                  dense: true,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: 0, vertical: -4),
+                                  title: Column(
+                                    children: [
+                                      Text(
+                                        parts[0],
+                                        style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      Text(
+                                        parts[1],
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (index <
+                                    (prediction.wasteSortingInfo.length - 1))
+                                  const Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 12),
+                                    child: Divider(
+                                      thickness: 1,
+                                      color: Color(0xffe0e0e0),
+                                      height: 20,
+                                    ),
+                                  ),
+                              ],
+                            )
+                          ];
+                        }),
+                      ],
+                    ),
+                  )),
+            ],
+          ),
+        ),
+        // 하단 고정 버튼
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: double.infinity,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2), // 그림자의 색상
+                    offset: Offset(0, -3), // 위쪽으로 그림자 위치
+                    blurRadius: 5, // 흐림 정도
+                  ),
+                ],
               ),
-            )),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Provider.of<AppState>(context, listen: false).onItemTapped(2);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xff748d6f), // 버튼 배경색 초록
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5), // borderRadius 5
+                  ),
+                ),
+                child: const Text(
+                  '다시 찍기',
+                  style: TextStyle(fontSize: 18, color: Colors.white), // 글씨 흰색
+                ),
+              ),
+            ),
+          ),
+        )
       ],
     );
   }
