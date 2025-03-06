@@ -105,19 +105,35 @@ class _WasteDetailState extends State<WasteDetail> {
                           itemCount: wasteInfo!.wasteSortingInfo.length,
                           itemBuilder: (context, index) {
                             return Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                              color: Colors.grey[100],
-                              margin: const EdgeInsets.symmetric(vertical: 15),
-                              child: ListTile(
-                                title: Text(
-                                  wasteInfo!.wasteSortingInfo[index],
-                                  style: const TextStyle(fontSize: 20),
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(3),
+                                  side: const BorderSide(
+                                    color: Color(0xffe0e0e0), // 연한 회색 테두리
+                                    width: 1, // 테두리 두께
+                                  ),
                                 ),
-                              ),
-                            );
+                                color: Color(0xfffdfdfd),
+                                margin:
+                                    const EdgeInsets.symmetric(vertical: 15),
+                                child: ListTile(
+                                  title: Column(
+                                    children: [
+                                      Text(
+                                        wasteInfo!.wasteSortingInfo[index]
+                                            .split(':')[0], // 전자 (타이틀)
+                                        style: const TextStyle(fontSize: 20),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const Divider(thickness: 1), // 구분선
+                                      Text(
+                                        wasteInfo!.wasteSortingInfo[index]
+                                            .split(':')[1], // 후자 (내용)
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                    ],
+                                  ),
+                                ));
                           },
                         ),
                   const SizedBox(height: 23),
