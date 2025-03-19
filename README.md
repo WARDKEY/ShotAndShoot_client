@@ -64,17 +64,17 @@
 ## 화면 구성
 | 메인 화면  |  폐기물 상세 화면   |
 | :-------------------------------------------: | :------------: |
-| <img src="https://github.com/user-attachments/assets/f9c6fad9-21a0-4acf-b212-e737ec36a4d4" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/662bfffa-a7ba-458b-b93c-946fe49b3066" width="320" height="700"> |
+| <img src="https://github.com/user-attachments/assets/957c5a7f-0b40-433f-8556-43d1056c07e1" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/19de0125-5b4f-43cc-8d3e-67abfb1ac4ef" width="320" height="700"> |
 | 게시판 화면  |  게시글 상세 화면  |  
 | <img src="https://github.com/user-attachments/assets/1e8d7113-bf43-438e-a892-e0c3324d4f19" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/daecc12b-05c5-4f61-906c-791d239a8bda" width="320" height="700"> |
 | 폐기물 스캔 화면 | 스캔 결과 화면 |
-| <img src="https://github.com/user-attachments/assets/af8fc919-990a-4e53-b391-5d72c127fba3" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/59596977-c6e9-4052-9c50-169e1e68d661" width="320" height="700"> |
+| <img src="https://github.com/user-attachments/assets/af8fc919-990a-4e53-b391-5d72c127fba3" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/86994b77-703c-4e8d-a5c0-ecce5625f99d" width="320" height="700"> |
 | 폐기물 업체 화면 | 폐기물 업체 선택 화면 |
-| <img src="https://github.com/user-attachments/assets/ea16c602-8039-4306-bbe5-8c6740ea6959" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/3a1afe22-0b65-41cd-8130-b4321ee0c5c5" width="320" height="700"> |
+| <img src="https://github.com/user-attachments/assets/1ccefa3e-f5f4-4b39-853f-cd3872af250c" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/3a1afe22-0b65-41cd-8130-b4321ee0c5c5" width="320" height="700"> |
 | 로그인 화면 | 회원가입 화면 |
-| <img src="https://github.com/user-attachments/assets/b0cdbee4-8c6c-4c0f-8a6a-9d5380178fe7" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/7b0e06cb-160f-4fdd-b088-203c72127973" width="320" height="700"> |
+| <img src="https://github.com/user-attachments/assets/b0cdbee4-8c6c-4c0f-8a6a-9d5380178fe7" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/9d73b7de-4763-4789-860d-7f05fe17607a" width="320" height="700"> |
 | 마이 페이지 화면 | 회원 정보 수정 화면    |  
-| <img src="https://github.com/user-attachments/assets/5b714078-0bfd-49cb-aac2-024221219708" width="320" height="700">  | <img src="https://github.com/user-attachments/assets/e471fa4d-dfd5-4479-a1c7-3edf5286bfaf" width="320" height="700"> |
+| <img src="https://github.com/user-attachments/assets/7cfa5880-295b-43cc-b260-dc46d2302ab8" width="320" height="700">  | <img src="https://github.com/user-attachments/assets/e471fa4d-dfd5-4479-a1c7-3edf5286bfaf" width="320" height="700"> |
 
 
 
