@@ -68,7 +68,7 @@
 | 게시판 화면  |  게시글 상세 화면  |  
 | <img src="https://github.com/user-attachments/assets/1e8d7113-bf43-438e-a892-e0c3324d4f19" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/daecc12b-05c5-4f61-906c-791d239a8bda" width="320" height="700"> |
 | 폐기물 스캔 화면 | 스캔 결과 화면 |
-| <img src="https://github.com/user-attachments/assets/af8fc919-990a-4e53-b391-5d72c127fba3" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/86994b77-703c-4e8d-a5c0-ecce5625f99d" width="320" height="700"> |
+| <img src="https://github.com/user-attachments/assets/9d535974-024d-42fa-8737-ae3cc33427f9" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/86994b77-703c-4e8d-a5c0-ecce5625f99d" width="320" height="700"> |
 | 폐기물 업체 화면 | 폐기물 업체 선택 화면 |
 | <img src="https://github.com/user-attachments/assets/1ccefa3e-f5f4-4b39-853f-cd3872af250c" width="320" height="700"> | <img src="https://github.com/user-attachments/assets/3a1afe22-0b65-41cd-8130-b4321ee0c5c5" width="320" height="700"> |
 | 로그인 화면 | 회원가입 화면 |
